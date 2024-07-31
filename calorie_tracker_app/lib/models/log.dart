@@ -4,18 +4,21 @@ class Log {
   Log({required this.foodId,
     required this.calories,
     required this.eatTime,
-    required this.name,});
+    required this.name,
+    this.id
+    });
 
+  String? id;       // Unique ID for the log
   String foodId;    // Unique ID for the food item
+  String name;      // Name of the food item
   int calories;     // Number of calories
   String eatTime;   // Time when the food was eaten (e.g., breakfast, lunch, dinner, snack)
-  String name;      // Name of the food item
 
   //Note.fromFirestore: Creates a Log instance from a Firestore DocumentSnapshot.
   factory Log.fromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     final data = snapshot.data();
     return Log(
-      foodId: snapshot.id,             // Use the document ID as foodId
+      foodId: snapshot.id,             // Temporarily use the document ID as foodId, this will need to be changed
       calories: data?['calories'],
       eatTime: data?['eatTime'],
       name: data?['name'],
