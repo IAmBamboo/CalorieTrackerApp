@@ -1,6 +1,6 @@
-import "package:assignment_02_notes_app/models/note.dart";
+import "package:calorie_tracker_app/app_state.dart";
+import "package:calorie_tracker_app/models/note.dart";
 import "package:flutter/material.dart";
-import "package:assignment_02_notes_app/app_state.dart";
 
 class NoteView extends StatefulWidget {
   const NoteView({required this.appState, this.note, super.key});

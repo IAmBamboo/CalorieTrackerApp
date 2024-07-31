@@ -1,7 +1,7 @@
+import 'package:calorie_tracker_app/app_state.dart';
+import 'package:calorie_tracker_app/pages/home.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:assignment_02_notes_app/app_state.dart';
-import 'package:assignment_02_notes_app/home.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

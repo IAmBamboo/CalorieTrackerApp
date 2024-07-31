@@ -1,9 +1,9 @@
+import "package:calorie_tracker_app/firebase_options.dart";
 import "package:flutter/material.dart";
 import "package:firebase_core/firebase_core.dart";
 import "package:firebase_auth/firebase_auth.dart" hide EmailAuthProvider;
 import "package:firebase_ui_auth/firebase_ui_auth.dart";
 import "package:cloud_firestore/cloud_firestore.dart";
-import "package:assignment_02_notes_app/firebase_options.dart";
 
 import "models/note.dart";
 

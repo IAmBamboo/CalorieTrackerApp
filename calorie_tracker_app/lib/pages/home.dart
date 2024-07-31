@@ -1,7 +1,7 @@
-import "package:assignment_02_notes_app/models/note.dart";
-import "package:assignment_02_notes_app/note_view.dart";
+import "package:calorie_tracker_app/models/note.dart";
+import "package:calorie_tracker_app/pages/note_view.dart";
 import "package:flutter/material.dart";
-import "package:assignment_02_notes_app/app_state.dart";
+import "package:calorie_tracker_app/app_state.dart";
 
 class HomePage extends StatefulWidget {
   const HomePage({required this.appState, super.key});
