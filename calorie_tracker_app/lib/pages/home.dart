@@ -1,4 +1,4 @@
-import "package:calorie_tracker_app/models/note.dart";
+import "package:calorie_tracker_app/models/log.dart";
 import "package:calorie_tracker_app/pages/note_view.dart";
 import "package:flutter/material.dart";
 import "package:calorie_tracker_app/app_state.dart";
@@ -12,7 +12,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
-  List<Note> _notesList = []; //Stored list of Notes
+  List<Log> _logsList = []; //Stored list of Logs (Logged food/drink entries)
   late bool _isLoggedIn; //Used to identify if a user is signed in
   int? _expandedTile; //Used to control which ListTile is expanded
   late AnimationController _controller; //Animation Controller
@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
   void initState() {
     super.initState();
     _isLoggedIn = widget.appState.loggedIn; //Checks to see if the User is signed in, update Bool as so
-    _notesList = widget.appState.notes ?? []; //Update local Notes from the User's Notes stored online
+    _logsList = widget.appState.logs ?? []; //Update local entry logs from the User's Logs stored online
     widget.appState.addListener(_updateState);
     _controller = AnimationController(
       vsync: this,
@@ -39,18 +39,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
     super.dispose();
   }
 
-  //Check to see if User is logged in and update Notes, reset _expandedTile
+  //Check to see if User is logged in and update Logs, reset _expandedTile
   void _updateState() {
     setState(() {
       _isLoggedIn = widget.appState.loggedIn;
-      _notesList = widget.appState.notes ?? [];
+      _logsList = widget.appState.logs ?? [];
       _expandedTile = null;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoggedIn) { //If there is a user signed in, show their Notes
+    if (_isLoggedIn) { //If there is a user signed in, show their Food Logs
       return Scaffold(
         backgroundColor: const Color.fromARGB(255, 17, 17, 17),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -70,7 +70,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
         ),
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 17, 17, 17),
-          title: Text("${widget.appState.user!.displayName}'s Notes", //Use the User's DisplayName
+          title: Text("${widget.appState.user!.displayName}'s Daily Calorie Log", //Use the User's DisplayName
             style: const TextStyle(
               color: Color.fromARGB(255, 255, 228, 141),
               shadows: <Shadow>[
@@ -98,12 +98,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
             ),
           ],
         ),
-        body: _buildList(_notesList),
+        body: _buildList(_logsList),
       );
     } else { //If there is no user signed in, show a Page asking the user to Sign in
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Notes App'),
+          title: const Text('Food Calorie Tracker App'),
         ),
         body: ListView(
           children: [
@@ -120,19 +120,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
     }
   }
 
-  /// Builds a list of Note widgets.
-  /// Each list item is a GestureDetector that when tapped, expands the object to show the full Note description.
+  /// Builds a list of Log widgets.
+  /// Each list item is a GestureDetector that when tapped, expands the object to show the full food entry Log description.
   /// An AnimatedSize widget is used to animate the expansion and contraction of the list items.
-  /// Each list item includes a ListTile displaying the note's title and description, an icon
-  /// indicating its expansion state, and a PopupMenuButton with options to edit or delete the note.
+  /// Each list item includes a ListTile displaying the food log entry's name and calories, an icon
+  /// indicating its expansion state, and a PopupMenuButton with options to edit or delete the log.
   ///
   /// Arguments:
-  /// - notes: A List<Note> containing the notes to be displayed.
-  Widget _buildList(List<Note> notes) {
+  /// - logs: A List<Log> containing the logs to be displayed.
+  Widget _buildList(List<Log> logs) {
     return ListView.builder(
-      itemCount: notes.length,
+      itemCount: logs.length,
       itemBuilder: (context, index) {
-        final note = notes[index];
+        final log = logs[index];
         final bool isExpanded = _expandedTile == index;
 
         return GestureDetector(
@@ -159,7 +159,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
                   ListTile(
                     key: UniqueKey(),
                     title: Text(
-                      note.title, 
+                      log.name, 
                       style: const TextStyle(
                         color: Color.fromARGB(255, 255, 242, 199),
                         shadows: <Shadow>[
@@ -171,7 +171,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
                       ),
                     ),
                     subtitle: Text(
-                      note.description, 
+                      log.calories.toString(), 
                       maxLines: isExpanded ? null : 1, 
                       overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -202,18 +202,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
                       onSelected: (value) {
                         switch (value) {
                           case 'open':
-                            Navigator.of(context).push(
-                              SlidePageRoute(
-                                page: NoteView(note: note, appState: widget.appState),
-                              ),
-                            );
+                            print('open');
+                            // Navigator.of(context).push(
+                            //   SlidePageRoute(
+                            //     page: NoteView(note: note, appState: widget.appState),
+                            //   ),
+                            // );
                             break;
                           case 'delete':
-                            widget.appState.deleteNote(
-                              note: note,
+                            widget.appState.deleteLog(
+                              log: log,
                               onSuccess: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Note was successfully deleted.')),
+                                  const SnackBar(content: Text('Food entry was successfully deleted.')),
                                 );
                               }
                             );
@@ -224,7 +225,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
                         return const [
                           PopupMenuItem(
                             value: 'open',
-                            child: Text("Edit"),
+                            child: Text("View Log"),
                           ),
                           PopupMenuItem(
                             value: 'delete',
