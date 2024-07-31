@@ -1,11 +1,10 @@
 import "package:calorie_tracker_app/firebase_options.dart";
+import "package:calorie_tracker_app/models/log.dart";
 import "package:flutter/material.dart";
 import "package:firebase_core/firebase_core.dart";
 import "package:firebase_auth/firebase_auth.dart" hide EmailAuthProvider;
 import "package:firebase_ui_auth/firebase_ui_auth.dart";
 import "package:cloud_firestore/cloud_firestore.dart";
-
-import "models/note.dart";
 
 class AppState extends ChangeNotifier {
   AppState() {
@@ -24,106 +23,117 @@ class AppState extends ChangeNotifier {
     _user = user;
   }
 
-  List<Note>? _notes;
-  List<Note>? get notes {
-    if (user == null) {
-      print('Cannot get notes when user is null'); //If the User is null, do not throw an error as the app will redirect the user to sign-in
-      return null;
-    }
-    return _notes;
-  }
-
-  set notes(List<Note>? notes) {
-    if (user == null) {
-      throw StateError('Cannot set notes when the user is null');
-    }
-    if (notes == null) {
-      throw ArgumentError('Cannot set notes to null');
-    }
-    _notes = notes;
+  String? _date; // The date for which logs are fetched and managed
+  String? get date => _date;
+  set date(String? date) {
+    _date = date;
     notifyListeners();
   }
 
-  void _fetchNotes() {
-    if (user == null) {
-      throw StateError('Cannot fetch notes when user is null');
+  List<Log>? _logs;
+  List<Log>? get logs {
+    if (user == null || date == null) {
+      print('Cannot get logs when user or date is null'); // If the User or Date is null, do not throw an error as the app will redirect the user to sign-in
+      return null;
+    }
+    return _logs;
+  }
+
+  set logs(List<Log>? logs) {
+    if (user == null || date == null) {
+      throw StateError('Cannot set logs when the user or date is null');
+    }
+    if (logs == null) {
+      throw ArgumentError('Cannot set logs to null');
+    }
+    _logs = logs;
+    notifyListeners();
+  }
+
+  void _fetchLogs() {
+    if (user == null || date == null) {
+      throw StateError('Cannot fetch logs when user or date is null');
     }
 
     FirebaseFirestore.instance
-        .collection('/notes/${user!.uid}/notes')
+        .collection('/savedDays/${user!.uid}/savedDays/${date!}/foods')
         .get()
         .then((snapshot) {
-      notes = snapshot.docs.map((doc) => Note.fromFirestore(doc)).toList();
+      logs = snapshot.docs.map((doc) => Log.fromFirestore(doc)).toList();
     });
   }
 
-  void updateNote({
-    required Note note, //Require a Note to be passed so we know what we're dealing with
+  void updateLog({
+    required Log log, //Require a Log to be passed so we know what we're dealing with
     required VoidCallback onSuccess //A Callback to let us know when it finishes
     }) {
 
     if (user == null) {
-      throw StateError('Cannot update a note when user is null');
+      throw StateError('Cannot update a log when user is null');
     }
 
     FirebaseFirestore.instance
-      .collection('/notes/${user!.uid}/notes')
-      .doc(note.id)
-      .update(note.toMap())
+      .collection('/savedDays/${user!.uid}/savedDays/${date!}/foods')
+      .doc(log.id) //this needs to be changed (make sure we are setting a proper ID in logs model)
+      .update(log.toMap())
       .then((_) {
         notifyListeners();
-        _fetchNotes(); //Update the locally stored notes
+        _fetchLogs(); //Update the locally stored logs
         onSuccess(); //A Callback to let us know when it finishes
       }
     );
   }
 
-  void deleteNote({
-    required Note note, //Require a Note to be passed so we know what we're dealing with
+  void deleteLog({
+    required Log log, //Require a Log to be passed so we know what we're dealing with
     required VoidCallback onSuccess //A Callback to let us know when it finishes
     }) {
     if (user == null) {
-      throw StateError('Cannot delete a note when user is null');
+      throw StateError('Cannot delete a log when user is null');
     }
 
     FirebaseFirestore.instance
-      .collection('/notes/${user!.uid}/notes')
-      .doc(note.id)
+      .collection('/savedDays/${user!.uid}/savedDays/${date!}/foods')
+      .doc(log.id)
       .delete()
       .then((_) {
-        notes!.remove(note);
+        logs!.remove(log);
         notifyListeners();
-        _fetchNotes(); //Update the locally stored notes
+        _fetchLogs(); //Update the locally stored logs
         onSuccess(); //A Callback to let us know when it finishes
       }
     );
   }
 
-  void addNote({
-    required String description, //The description/contents to be saved
-    required String title, //The title to be saved
+  void addLog({
+    required String foodId, // The unique ID of the food item to be saved
+    required String name, // The name of the food to be saved
+    required int calories, // Number of calories
+    required String eatTime, // Time when the food was eaten (e.g., breakfast, lunch, dinner, snack)
     required Function(String) onSuccess, //A Callback to let us know when it finishes
   }) {
     if (user == null) {
-      throw StateError('Cannot add a note when user is null');
+      throw StateError('Cannot add a log when user is null');
     }
 
-    final note = Note(
-      description: description,
-      title: title,
+    final log = Log(
+      foodId: foodId,
+      name: name,
+      calories: calories,
+      eatTime: eatTime,
     );
 
     FirebaseFirestore.instance
-      .collection('/notes/${user!.uid}/notes')
-      .add(note.toMap())
+      .collection('/savedDays/${user!.uid}/savedDays/${date!}/foods')
+      .add(log.toMap())
       .then((DocumentReference doc) {
-        note.id = doc.id;
-        notes!.add(note);
+        log.id = doc.id;
+        logs!.add(log);
         notifyListeners();
-        _fetchNotes(); //Update the locally stored notes
+        _fetchLogs(); //Update the locally stored logs
         onSuccess(doc.id); //A Callback to let us know when it finishes, pass through the newly created doc.id
       }).catchError((error) {
-      print('Failed to add note: $error');
+      print('Failed to add log: $error');
     }
   );
 }
@@ -144,10 +154,10 @@ class AppState extends ChangeNotifier {
       if (user != null) {
         _loggedIn = true;
         this.user = user;
-        _fetchNotes();
+        _fetchLogs();
       } else {
         _loggedIn = false;
-        _notes = [];
+        _logs = [];
         print('Console Print: No user is signed in!');
       }
 
