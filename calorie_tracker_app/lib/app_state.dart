@@ -5,6 +5,7 @@ import "package:firebase_core/firebase_core.dart";
 import "package:firebase_auth/firebase_auth.dart" hide EmailAuthProvider;
 import "package:firebase_ui_auth/firebase_ui_auth.dart";
 import "package:cloud_firestore/cloud_firestore.dart";
+import 'package:intl/intl.dart';
 
 class AppState extends ChangeNotifier {
   AppState() {
@@ -32,7 +33,7 @@ class AppState extends ChangeNotifier {
 
   List<Log>? _logs;
   List<Log>? get logs {
-    if (user == null || date == null) {
+    if (user == null) {
       print('Cannot get logs when user or date is null'); // If the User or Date is null, do not throw an error as the app will redirect the user to sign-in
       return null;
     }
@@ -40,7 +41,7 @@ class AppState extends ChangeNotifier {
   }
 
   set logs(List<Log>? logs) {
-    if (user == null || date == null) {
+    if (user == null) {
       throw StateError('Cannot set logs when the user or date is null');
     }
     if (logs == null) {
@@ -50,16 +51,25 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _fetchLogs() {
-    if (user == null || date == null) {
-      throw StateError('Cannot fetch logs when user or date is null');
+  void _fetchLogs(String date) {
+    if (user == null) {
+      //throw StateError('Cannot fetch logs when user or date is null');
+      print('Console Print: Cannot fetch logs when user is null');
+      return;
     }
 
     FirebaseFirestore.instance
-        .collection('/savedDays/${user!.uid}/savedDays/${date!}/foods')
+        .collection('/savedDays/${user!.uid}/savedDays/$date/foods')
         .get()
         .then((snapshot) {
-      logs = snapshot.docs.map((doc) => Log.fromFirestore(doc)).toList();
+          print('Console Print: Query completed with ${snapshot.docs.length} documents found');
+          if (snapshot.docs.isEmpty) {
+            print('Console Print: No logs found for date $date');
+          }
+          logs = snapshot.docs.map((doc) => Log.fromFirestore(doc)).toList();
+          print('Console Print: Logs fetched and updated');
+        }).catchError((error) {
+      print('Console Print: Error fetching logs: $error');
     });
   }
 
@@ -78,7 +88,7 @@ class AppState extends ChangeNotifier {
       .update(log.toMap())
       .then((_) {
         notifyListeners();
-        _fetchLogs(); //Update the locally stored logs
+        _fetchLogs(_date!); //Update the locally stored logs
         onSuccess(); //A Callback to let us know when it finishes
       }
     );
@@ -99,7 +109,7 @@ class AppState extends ChangeNotifier {
       .then((_) {
         logs!.remove(log);
         notifyListeners();
-        _fetchLogs(); //Update the locally stored logs
+        _fetchLogs(_date!); //Update the locally stored logs
         onSuccess(); //A Callback to let us know when it finishes
       }
     );
@@ -130,7 +140,7 @@ class AppState extends ChangeNotifier {
         log.id = doc.id;
         logs!.add(log);
         notifyListeners();
-        _fetchLogs(); //Update the locally stored logs
+        _fetchLogs(_date!); //Update the locally stored logs
         onSuccess(doc.id); //A Callback to let us know when it finishes, pass through the newly created doc.id
       }).catchError((error) {
       print('Failed to add log: $error');
@@ -139,29 +149,44 @@ class AppState extends ChangeNotifier {
 }
 
   Future<void> init() async {
-    // Initial app state
-
+  try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    FirebaseUIAuth.configureProviders(
-      [
-        EmailAuthProvider(),
-      ],
-    );
+    print('Console Print: Firebase initialized successfully');
+
+    FirebaseUIAuth.configureProviders([
+      EmailAuthProvider(),
+    ]);
+
+    // Set date to show today
+    _date = DateFormat('M-d-yyyy').format(DateTime.now());
+    print('Console Print: Date set to $_date');
+    notifyListeners();
 
     FirebaseAuth.instance.userChanges().listen((user) {
+      print('Console Print: User change detected');
       if (user != null) {
+        print('Console Print: User is not null, user is ${user.email}');
         _loggedIn = true;
         this.user = user;
-        _fetchLogs();
+        if (_date != null) {
+          print('Console Print: Fetching logs with $_date');
+          _fetchLogs(_date!);
+          print('Console Print: Fetched logs');
+        } else {
+          print('Console Print: Date is null at login');
+        }
       } else {
         _loggedIn = false;
         _logs = [];
         print('Console Print: No user is signed in!');
       }
-
       notifyListeners();
+      print('Console Print: notifyListeners() called');
     });
+  } catch (e) {
+    print('Console Print: Error initializing Firebase: $e');
   }
+}
 }
