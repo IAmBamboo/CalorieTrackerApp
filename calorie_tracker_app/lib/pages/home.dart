@@ -1,17 +1,18 @@
-import "package:calorie_tracker_app/models/log.dart";
-import "package:calorie_tracker_app/pages/note_view.dart";
-import "package:flutter/material.dart";
-import "package:calorie_tracker_app/app_state.dart";
+import 'package:calorie_tracker_app/models/log.dart';
+import 'package:calorie_tracker_app/pages/log_entry_view.dart';
+import 'package:flutter/material.dart';
+import 'package:calorie_tracker_app/app_state.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({required this.appState, super.key});
 
   final AppState appState;
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   List<Log> _logsList = []; //Stored list of Logs (Logged food/drink entries)
   late bool _isLoggedIn; //Used to identify if a user is signed in
   int? _expandedTile; //Used to control which ListTile is expanded
@@ -25,9 +26,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
     widget.appState.addListener(_updateState);
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(
-        seconds: 3,
-      ),
+      duration: const Duration(seconds: 3),
     );
   }
 
@@ -45,12 +44,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
       _isLoggedIn = widget.appState.loggedIn;
       _logsList = widget.appState.logs ?? [];
       _expandedTile = null;
+      print('Console Print: User is ${widget.appState.user?.displayName ?? 'unknown'}');
+      print('Console Print: Login status is $_isLoggedIn');
     });
   }
 
   @override
   Widget build(BuildContext context) {
     if (_isLoggedIn) { //If there is a user signed in, show their Food Logs
+      print('Console Print: Login status is $_isLoggedIn');
+
       return Scaffold(
         backgroundColor: const Color.fromARGB(255, 17, 17, 17),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -58,12 +61,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
           color: Color.fromARGB(255, 44, 44, 44),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () => print('open + btn'),
-          // Navigator.of(context).push(
-          //   SlidePageRoute(
-          //     page: NoteView(appState: widget.appState),
-          //   ),
-          // ),
+          onPressed: () => Navigator.of(context).push(
+            SlidePageRoute(
+              page: LogEntryView(appState: widget.appState),
+            ),
+          ),
           backgroundColor: const Color.fromARGB(255, 255, 196, 0),
           foregroundColor: Colors.black,
           tooltip: 'Create New',
@@ -71,7 +73,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
         ),
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 17, 17, 17),
-          title: Text("${widget.appState.user!.displayName}'s Daily Calorie Log", //Use the User's DisplayName
+          title: Text("${widget.appState.user?.displayName}'s Daily Calorie Log", //Use the User's DisplayName
             style: const TextStyle(
               color: Color.fromARGB(255, 255, 228, 141),
               shadows: <Shadow>[
@@ -86,12 +88,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
             IconButton(
               icon: const Icon(Icons.account_circle,
                 color: Color.fromARGB(255, 255, 228, 141),
-                  shadows: <Shadow>[
-                    Shadow(
-                      blurRadius: 5,
-                      color: Color.fromARGB(255, 255, 228, 141),
-                    ),
-                  ],
+                shadows: <Shadow>[
+                  Shadow(
+                    blurRadius: 5,
+                    color: Color.fromARGB(255, 255, 228, 141),
+                  ),
+                ],
               ),
               onPressed: () {
                 Navigator.of(context).pushNamed('/profile');
@@ -99,7 +101,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
             ),
           ],
         ),
-        body: _buildList(_logsList),
+        body: _logsList.isEmpty
+          ? Center(child: Text("No logs available."))
+          : _buildList(_logsList),
       );
     } else { //If there is no user signed in, show a Page asking the user to Sign in
       return Scaffold(
@@ -266,4 +270,3 @@ class SlidePageRoute extends PageRouteBuilder {
         },
       );
 }
-
