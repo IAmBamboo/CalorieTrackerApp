@@ -102,7 +102,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ],
         ),
         body: _logsList.isEmpty
-          ? Center(child: Text("No logs available."))
+          ? const Center(child: Text("No logs available."))
           : _buildList(_logsList),
       );
     } else { //If there is no user signed in, show a Page asking the user to Sign in
@@ -206,12 +206,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       onSelected: (value) {
                         switch (value) {
                           case 'open':
-                            print('open');
-                            // Navigator.of(context).push(
-                            //   SlidePageRoute(
-                            //     page: NoteView(note: note, appState: widget.appState),
-                            //   ),
-                            // );
+                            Navigator.of(context).push(
+                              SlidePageRoute(
+                                page: LogEntryView(log: log, appState: widget.appState),
+                              ),
+                            );
                             break;
                           case 'delete':
                             widget.appState.deleteLog(
