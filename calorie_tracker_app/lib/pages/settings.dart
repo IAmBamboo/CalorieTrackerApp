@@ -32,7 +32,6 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
             onPressed: () {
-              Navigator.of(context).pop();
               Navigator.of(context).pushNamed('/profile');
             },
           ),
