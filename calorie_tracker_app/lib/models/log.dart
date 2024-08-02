@@ -9,7 +9,7 @@ class Log {
     });
 
   String? id;       // Unique ID for the log
-  String foodId;    // Unique ID for the food item
+  String foodId;    // Unique ID for the food item used to find it in OpenFoodFact's database
   String name;      // Name of the food item
   int calories;     // Number of calories
   String eatTime;   // Time when the food was eaten (e.g., breakfast, lunch, dinner, snack)
@@ -18,7 +18,8 @@ class Log {
   factory Log.fromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     final data = snapshot.data();
     return Log(
-      foodId: snapshot.id,             // Temporarily use the document ID as foodId, this will need to be changed
+      id: snapshot.id,             // Temporarily use the document ID as foodId, this will need to be changed
+      foodId: data?['foodId'],
       calories: data?['calories'],
       eatTime: data?['eatTime'],
       name: data?['name'],
