@@ -59,6 +59,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       return Scaffold(
         backgroundColor: const Color.fromARGB(255, 17, 17, 17),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        //BOTTOM NAV BAR
         bottomNavigationBar: BottomAppBar(
           color: const Color.fromARGB(255, 44, 44, 44),
           child: Row(
@@ -74,18 +75,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                   ],
                 ),
-                onPressed: () {
-                  //Change the date to 8-1-2024 for debug
+                onPressed: () async {
+                  //Change the date to current time for debug
                   print('Attempt to change date');
-                  setState(() {
-                    widget.appState.date = '8-1-2024';
-                    widget.appState.fetchLogs('8-1-2024');
-                    print('Date is ${widget.appState.date}');
+                  DateTime? pickDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2101),
+                  );
+                  if (pickDate != null) {
+                    String newDate = DateFormat('M-d-yyyy').format(pickDate);
+                    setState(() {
+                      widget.appState.date = newDate;
+                      widget.appState.fetchLogs(newDate);
+                      print('Updated AppState Date is ${widget.appState.date}');
                   });
+                  }
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.calendar_month_rounded,
+                icon: const Icon(Icons.settings,
                   color: Color.fromARGB(255, 255, 228, 141),
                   shadows: <Shadow>[
                     Shadow(
@@ -95,19 +105,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ],
                 ),
                 onPressed: () {
-                  //Change the date to current time for debug
-                  print('Attempt to change date');
-                  setState(() {
-                    String newDate = DateFormat('M-d-yyyy').format(DateTime.now());
-                    widget.appState.date = newDate;
-                    widget.appState.fetchLogs(newDate);
-                    print('Updated AppState Date is ${widget.appState.date}');
-                  });
+                  //Settings
+                  print('settings');
                 },
               ),
             ],
           ),
         ),
+        //END OF BOTTOM NAV BAR
         floatingActionButton: FloatingActionButton(
           onPressed: () => Navigator.of(context).push(
             SlidePageRoute(
@@ -150,7 +155,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ],
         ),
         body: _logsList.isEmpty
-          ? const Center(child: Text("No logs available."))
+          ? const Center(
+            child: Text(
+              "No logs available.",
+              style: TextStyle(
+                  color: Color.fromARGB(255, 255, 242, 199),
+                  shadows: <Shadow>[
+                    Shadow(
+                      blurRadius: 2,
+                      color: Color.fromARGB(255, 255, 228, 141),
+                    ),
+                  ],
+                ),
+            )
+          )
           : _buildList(_logsList),
       );
     } else { //If there is no user signed in, show a Page asking the user to Sign in
