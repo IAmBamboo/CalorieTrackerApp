@@ -44,7 +44,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       _isLoggedIn = widget.appState.loggedIn;
       _logsList = widget.appState.logs ?? [];
       _expandedTile = null;
-      print('Console Print: User is ${widget.appState.user?.displayName ?? 'unknown'}');
+      print('Console Print: User is ${widget.appState.user?.email ?? 'unknown'}');
       print('Console Print: Login status is $_isLoggedIn');
     });
   }
@@ -73,7 +73,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 17, 17, 17),
-          title: Text("${widget.appState.user?.displayName}'s Daily Calorie Log", //Use the User's DisplayName
+          title: Text("${widget.appState.user?.email!.split('@').first}'s Daily Calorie Log", //Use the User's DisplayName
             style: const TextStyle(
               color: Color.fromARGB(255, 255, 228, 141),
               shadows: <Shadow>[
