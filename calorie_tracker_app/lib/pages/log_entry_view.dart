@@ -204,6 +204,7 @@ class _LogEntryViewState extends State<LogEntryView> {
                   Text("Food Cal: ${_foodCal.toString()}", style: const TextStyle(color: Colors.white)),
                 ],
               ),
+              //CLEAN THIS UP
               if (_isNewLog) 
                 if (!_isLoading)
                 const SizedBox(height: 20), //Padding
