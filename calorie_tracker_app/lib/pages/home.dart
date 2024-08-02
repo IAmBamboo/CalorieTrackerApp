@@ -1,6 +1,5 @@
 import 'package:calorie_tracker_app/models/log.dart';
 import 'package:calorie_tracker_app/pages/day_log_view.dart';
-import 'package:calorie_tracker_app/pages/log_entry_view.dart';
 import 'package:calorie_tracker_app/pages/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:calorie_tracker_app/app_state.dart';
