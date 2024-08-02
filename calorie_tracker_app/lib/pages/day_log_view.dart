@@ -166,7 +166,27 @@ class DayLogView extends StatelessWidget {
                                   ),
                             trailing: PopupMenuButton(
                               iconColor: const Color.fromARGB(255, 255, 196, 0),
-                              onSelected: (value) => onLogAction(index, value),
+                              onSelected: (value) {
+                                switch (value) {
+                                  case 'open':
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => LogEntryView(log: log, appState: appState),
+                                      ),
+                                    );
+                                    break;
+                                  case 'delete':
+                                    appState.deleteLog(
+                                      log: log,
+                                      onSuccess: () {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('Log was successfully deleted.')),
+                                        );
+                                      }
+                                    );
+                                    break;
+                                }
+                              },
                               itemBuilder: (BuildContext bc) {
                                 return const [
                                   PopupMenuItem(
