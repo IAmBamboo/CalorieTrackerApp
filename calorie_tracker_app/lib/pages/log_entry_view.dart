@@ -204,7 +204,15 @@ class _LogEntryViewState extends State<LogEntryView> {
                   Text("Food Cal: ${_foodCal.toString()}", style: const TextStyle(color: Colors.white)),
                 ],
               ),
-              const SizedBox(height: 60), //Padding
+              if (_isNewLog) 
+                if (!_isLoading)
+                const SizedBox(height: 20), //Padding
+              if (_isNewLog) 
+                if (!_isLoading)
+                  Text(_searchMessage, style: const TextStyle(color: Colors.white)),
+              if (_isNewLog) 
+                if (!_isLoading)
+                const SizedBox(height: 20), //Padding
               const Text('Data provided by (c) Open Food Facts contributors',
                 style: TextStyle(
                     color: Colors.white
