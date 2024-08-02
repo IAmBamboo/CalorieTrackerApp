@@ -21,6 +21,12 @@ class _LogEntryViewState extends State<LogEntryView> {
   late bool _isLoggedIn; //Used to identify if a user is signed in
   late String? _docId; //Local DocId/Log Id
 
+  // Search state variables
+  String _searchQuery = '';
+  List<dynamic> _searchResults = [];
+  String _searchMessage = '';
+  bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +42,33 @@ class _LogEntryViewState extends State<LogEntryView> {
       //A Log was not provided so set everything to defaults
       _foodName = '';
       _foodCal = 0;
+    }
+  }
+
+  Future<void> _searchFood(String query) async {
+    //API documentation: https://openfoodfacts.github.io/openfoodfacts-server/api/
+    //                   https://openfoodfacts.github.io/openfoodfacts-server/api/tutorial-off-api/
+    setState(() {
+      _isLoading = true;
+    });
+
+    final response = await http.get(
+      Uri.parse('https://world.openfoodfacts.org/cgi/search.pl?search_terms=$query&search_simple=1&action=process&json=1'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        _searchResults = data['products'] ?? [];
+        _searchMessage = 'Search found ${_searchResults.length} products';
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _searchMessage = 'Error fetching search results';
+        _isLoading = false;
+      });
+      // Handle
     }
   }
 
@@ -84,41 +117,50 @@ class _LogEntryViewState extends State<LogEntryView> {
             children: [
               if (_isNewLog) 
                 // THIS IS A NEW LOG, SHOW A SEARCH TO THE OPENFOODFACT'S DATABASE
-                TextField(
-                  style: const TextStyle(
-                    color: Colors.white
-                  ),
-                  cursorColor: Colors.white,
-                  decoration: const InputDecoration(
-                    hintText: 'Search here',
-                    hintStyle: TextStyle(
-                      color: Colors.grey
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        style: const TextStyle(color: Colors.white),
+                        cursorColor: Colors.white,
+                        decoration: const InputDecoration(
+                          hintText: 'Search here',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Color.fromARGB(255, 255, 228, 141), width: 2.0),
+                          ),
+                        ),
+                        onChanged: (query) {
+                          setState(() {
+                            _searchQuery = query;
+                          });
+                        },
+                      ),
                     ),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
+                    IconButton(
+                      icon: const Icon(Icons.search, color: Color.fromARGB(255, 255, 228, 141)), // Use a search icon
+                      onPressed: () {
+                        _searchFood(_searchQuery);
+                      },
                     ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color.fromARGB(255, 255, 228, 141), width: 2.0), // Customize color and width here
-                    ),
-                  ),
-                  onChanged: (query) {
-                    // Trigger search logic
-                  },
+                  ],
                 ),
+              const SizedBox(height: 40), //Padding
               if (_isNewLog) 
-                ElevatedButton(
-                  onPressed: () {
-                    // Trigger search logic
-                  },
-                  child: const Text('Search'),
-                ),
-              if (_isNewLog) 
-                const Expanded(
-                  child: SingleChildScrollView(
-                    //This is the TextField for the Description/Content of the Note document
-                    child: Text('List')
-                  ),
-                ),
+                if (_isLoading)
+                  const CircularProgressIndicator()
+                else
+                  Text(_searchMessage, style: const TextStyle(color: Colors.white)),
+                  // Expanded(
+                  //   child: SingleChildScrollView(
+                  //     //This is the TextField for the Description/Content of the Note document
+                  //     child: Text('List')
+                  //   ),
+                  // ),
               if (!_isNewLog) 
               // THIS IS A NOT NEW LOG, SHOW CONTENT OF THE LOG ITEM
               Column(
@@ -128,6 +170,17 @@ class _LogEntryViewState extends State<LogEntryView> {
                   Text("Food Cal: ${_foodCal.toString()}", style: const TextStyle(color: Colors.white)),
                 ],
               ),
+              const SizedBox(height: 60), //Padding
+              const Text('Data provided by (c) Open Food Facts contributors',
+                style: TextStyle(
+                    color: Colors.white
+                  ),
+                ),
+              const Text('https://world.openfoodfacts.org/',
+                style: TextStyle(
+                    color: Colors.white
+                  ),
+                ),
             ]
           ),
         ),
