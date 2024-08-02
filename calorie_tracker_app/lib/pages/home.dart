@@ -136,26 +136,4 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         );
     }
   }
-
-}
-
-/// A custom PageRouteBuilder that creates a slide transition from left to right when navigating.
-/// 
-/// Properties:
-/// - page: The widget representing the new page to navigate to.
-class SlidePageRoute extends PageRouteBuilder {
-  final Widget page;
-
-  SlidePageRoute({required this.page})
-    : super(
-        pageBuilder: (context, animation, secondaryAnimation) => page,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          var tween = Tween(
-            begin: const Offset(-1.0, 0.0), 
-            end: Offset.zero
-          )
-          .chain(CurveTween(curve: Curves.easeOutQuint));
-          return SlideTransition(position: animation.drive(tween), child: child);
-        },
-      );
 }
