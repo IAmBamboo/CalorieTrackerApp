@@ -1,4 +1,5 @@
 import 'package:calorie_tracker_app/app_state.dart';
+import 'package:calorie_tracker_app/pages/log_entry_view.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -21,6 +22,18 @@ class DayLogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => LogEntryView(appState: appState),
+            ),
+          ),
+          backgroundColor: const Color.fromARGB(255, 255, 196, 0),
+          foregroundColor: Colors.black,
+          tooltip: 'Create New',
+          child: const Icon(Icons.add),
+        ),
       backgroundColor: const Color.fromARGB(255, 17, 17, 17),
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 17, 17, 17),

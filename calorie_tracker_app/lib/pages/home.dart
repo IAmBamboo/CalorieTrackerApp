@@ -66,16 +66,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
       return Scaffold(
         backgroundColor: const Color.fromARGB(255, 17, 17, 17),
-        floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.business),
-              label: 'Business',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.settings),
@@ -87,17 +82,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           onTap: _onNavItemTapped,
         ),
         //END OF BOTTOM NAV BAR
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => Navigator.of(context).push(
-            SlidePageRoute(
-              page: LogEntryView(appState: widget.appState),
-            ),
-          ),
-          backgroundColor: const Color.fromARGB(255, 255, 196, 0),
-          foregroundColor: Colors.black,
-          tooltip: 'Create New',
-          child: const Icon(Icons.add),
-        ),
         // BODY OF PAGE
         body: _getBody()
       );
@@ -142,8 +126,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         );
       case 1:
-        //return const BusinessPage();
-      case 2:
         return const SettingsPage();
       default:
         return const Center(
