@@ -1,9 +1,16 @@
+import 'package:calorie_tracker_app/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:calorie_tracker_app/widgets/splash.dart';
+import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp()); // Start with MyApp
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AppState(), // Initialize AppState here
+      child: MyApp(), // Start with MyApp
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
