@@ -113,34 +113,36 @@ class _NoteViewState extends State<NoteView> {
                         onPressed: () {
                           //Check if this instance is a new Note or if it's an already existing one
                           if (_isNewNote) {
+                            print('press add');
                             //It's a new Note, so save it as a new Note to the user's database
-                            widget.appState.addNote(
-                              description: _noteContent.text, 
-                              title: _noteTitle.text,
-                              onSuccess: (docId) { //Get the DocId of the new Note
-                                setState(() {
-                                  _isNewNote = false; //Set it so this is now an existing Note
-                                  _docId = docId; //Transfer the DocId to the locally stored one
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Note was successfully created!', style: TextStyle(color: Colors.white))),
-                                );
-                              },
-                            );
+                            // widget.appState.addNote(
+                            //   description: _noteContent.text, 
+                            //   title: _noteTitle.text,
+                            //   onSuccess: (docId) { //Get the DocId of the new Note
+                            //     setState(() {
+                            //       _isNewNote = false; //Set it so this is now an existing Note
+                            //       _docId = docId; //Transfer the DocId to the locally stored one
+                            //     });
+                            //     ScaffoldMessenger.of(context).showSnackBar(
+                            //       const SnackBar(content: Text('Note was successfully created!', style: TextStyle(color: Colors.white))),
+                            //     );
+                            //   },
+                            // );
                           } else {
+                            print('press update');
                             //It's an already existing Note, so update it online
-                            widget.appState.updateNote(
-                              note: Note(
-                                id: widget.note!.id,
-                                title: _noteTitle.text,
-                                description: _noteContent.text,
-                              ),
-                              onSuccess: () { 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Note was successfully updated!', style: TextStyle(color: Colors.white))),
-                                );
-                              }
-                            );
+                            // widget.appState.updateNote(
+                            //   note: Note(
+                            //     id: widget.note!.id,
+                            //     title: _noteTitle.text,
+                            //     description: _noteContent.text,
+                            //   ),
+                            //   onSuccess: () { 
+                            //     ScaffoldMessenger.of(context).showSnackBar(
+                            //       const SnackBar(content: Text('Note was successfully updated!', style: TextStyle(color: Colors.white))),
+                            //     );
+                            //   }
+                            // );
                           }
                         },
                         icon: const Icon(Icons.save,
@@ -167,21 +169,22 @@ class _NoteViewState extends State<NoteView> {
                       //This is the Delete Button which appears depending on if a Note was passed through when navigating to this page
                       IconButton(
                         onPressed: () {
+                          print('press del');
                           //Delete the Note
-                          widget.appState.deleteNote(
-                            note: Note(
-                                id: widget.note != null ? //If a Note was passed through, use its Id, if we just created it then use the locally stored Id
-                                widget.note!.id : _docId,
-                                title: _noteTitle.text,
-                                description: _noteContent.text,
-                              ),
-                            onSuccess: () {
-                              Navigator.of(context).pop(); //Return the User to the HomePage
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Note was successfully deleted.', style: TextStyle(color: Colors.white),)),
-                              );
-                            }
-                          );
+                          // widget.appState.deleteNote(
+                          //   note: Note(
+                          //       id: widget.note != null ? //If a Note was passed through, use its Id, if we just created it then use the locally stored Id
+                          //       widget.note!.id : _docId,
+                          //       title: _noteTitle.text,
+                          //       description: _noteContent.text,
+                          //     ),
+                          //   onSuccess: () {
+                          //     Navigator.of(context).pop(); //Return the User to the HomePage
+                          //     ScaffoldMessenger.of(context).showSnackBar(
+                          //       const SnackBar(content: Text('Note was successfully deleted.', style: TextStyle(color: Colors.white),)),
+                          //     );
+                          //   }
+                          // );
                         },
                         icon: const Icon(Icons.delete,
                           color: Color.fromARGB(255, 255, 196, 0),
