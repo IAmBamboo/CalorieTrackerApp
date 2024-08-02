@@ -63,9 +63,22 @@ class _LogEntryViewState extends State<LogEntryView> {
       final products = data['products'] ?? [];
       final List<FoodProduct> searchResults = products.map<FoodProduct>((product) {
         final nutriments = product['nutriments'] ?? {};
-        final double? calories = nutriments.containsKey('energy-kcal_serving') ? nutriments['energy-kcal_serving'].toDouble() : null;
-        final String? servingSize = product['serving_size'];
+        final String? originalServingSize = product['serving_size'];
         final String productName = product['product_name'] ?? 'Unknown product';
+
+        double? calories;
+        String? servingSize = originalServingSize;
+
+        if (nutriments.containsKey('energy-kcal_serving')) {
+          calories = nutriments['energy-kcal_serving'].toDouble();
+        } else if (nutriments.containsKey('energy-kcal_100g')) {
+          //resort to 100g/100ml stats if no cal per serving is found
+          calories = nutriments['energy-kcal_100g'].toDouble();
+          servingSize = '100g/100ml';
+        } else {
+          calories = null;
+        }
+
         return FoodProduct(name: productName, calories: calories, servingSize: servingSize);
       }).toList();
 
@@ -270,7 +283,7 @@ class _LogEntryViewState extends State<LogEntryView> {
                         ],
                       ),
                     ),
-                    subtitle: Text('${product.calories?.toString() ?? 'Unknown'} cals per serving of ${product.servingSize ?? 'Unknown'}', 
+                    subtitle: Text('${product.calories?.toString() ?? 'Unknown'} cals per ${product.servingSize ?? 'Unknown'}', 
                       maxLines: isExpanded ? null : 1, 
                       overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
                       style: const TextStyle(
