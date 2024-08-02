@@ -77,12 +77,37 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: Colors.amber[800],
+          unselectedItemColor: Colors.white,
+          selectedItemColor: const Color.fromARGB(255, 255, 242, 199),
+          selectedIconTheme: const IconThemeData(
+            color: Color.fromARGB(255, 255, 228, 141),
+            shadows: <Shadow>[
+              Shadow(
+                blurRadius: 10,
+                color: Color.fromARGB(255, 255, 228, 141),
+              ),
+            ],
+          ),
+          unselectedIconTheme: const IconThemeData(
+            color: Colors.white,
+          ),
+          backgroundColor: const Color.fromARGB(255, 39, 39, 39),
           onTap: _onNavItemTapped,
         ),
         //END OF BOTTOM NAV BAR
         // BODY OF PAGE
-        body: _getBody()
+        body: _isLoggedIn ? _getBody() :
+        ListView(
+          children: [
+            const SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed('/sign-in');
+              },
+              child: const Text('Sign In'),
+            ),
+          ],
+        ),
       );
     } else { //If there is no user signed in, show a Page asking the user to Sign in
       return Scaffold(
