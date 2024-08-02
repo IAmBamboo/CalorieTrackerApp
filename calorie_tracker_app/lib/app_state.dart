@@ -51,7 +51,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _fetchLogs(String date) {
+  void fetchLogs(String date) {
     if (user == null) {
       //throw StateError('Cannot fetch logs when user or date is null');
       print('Console Print: Cannot fetch logs when user is null');
@@ -88,7 +88,7 @@ class AppState extends ChangeNotifier {
       .update(log.toMap())
       .then((_) {
         notifyListeners();
-        _fetchLogs(_date!); //Update the locally stored logs
+        fetchLogs(_date!); //Update the locally stored logs
         onSuccess(); //A Callback to let us know when it finishes
       }
     );
@@ -109,7 +109,7 @@ class AppState extends ChangeNotifier {
       .then((_) {
         logs!.remove(log);
         notifyListeners();
-        _fetchLogs(_date!); //Update the locally stored logs
+        fetchLogs(_date!); //Update the locally stored logs
         onSuccess(); //A Callback to let us know when it finishes
       }
     );
@@ -140,7 +140,7 @@ class AppState extends ChangeNotifier {
         log.id = doc.id;
         logs!.add(log);
         notifyListeners();
-        _fetchLogs(_date!); //Update the locally stored logs
+        fetchLogs(_date!); //Update the locally stored logs
         onSuccess(doc.id); //A Callback to let us know when it finishes, pass through the newly created doc.id
       }).catchError((error) {
       print('Failed to add log: $error');
@@ -172,7 +172,7 @@ class AppState extends ChangeNotifier {
         this.user = user;
         if (_date != null) {
           print('Console Print: Fetching logs with $_date');
-          _fetchLogs(_date!);
+          fetchLogs(_date!);
           print('Console Print: Fetched logs');
         } else {
           print('Console Print: Date is null at login');
