@@ -65,6 +65,7 @@ class _LogEntryViewState extends State<LogEntryView> {
         final nutriments = product['nutriments'] ?? {};
         final String? originalServingSize = product['serving_size'];
         final String productName = product['product_name'] ?? 'Unknown product';
+        final String? quantity = product['quantity'] ?? '';
 
         double? calories;
         String? servingSize = originalServingSize;
@@ -79,7 +80,12 @@ class _LogEntryViewState extends State<LogEntryView> {
           calories = null;
         }
 
-        return FoodProduct(name: productName, calories: calories, servingSize: servingSize);
+        return FoodProduct(
+          name: productName, 
+          calories: calories, 
+          servingSize: servingSize,
+          quantity: quantity,
+        );
       }).toList();
 
       setState(() {
@@ -272,7 +278,7 @@ class _LogEntryViewState extends State<LogEntryView> {
                 children: [
                   ListTile(
                     title: Text(
-                      product.name, 
+                      '${product.name} - ${product.quantity}', 
                       style: const TextStyle(
                         color: Color.fromARGB(255, 255, 242, 199),
                         shadows: <Shadow>[
