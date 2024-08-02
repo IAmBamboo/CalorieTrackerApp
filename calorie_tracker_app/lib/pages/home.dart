@@ -175,8 +175,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ],
                       ),
                     ),
-                    subtitle: Text(
-                      log.calories.toString(), 
+                    subtitle: Text('Calories: ${log.calories.toString()}', 
                       maxLines: isExpanded ? null : 1, 
                       overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
                       style: const TextStyle(
