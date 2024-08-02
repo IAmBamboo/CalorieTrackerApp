@@ -2,6 +2,7 @@ import 'package:calorie_tracker_app/models/log.dart';
 import 'package:calorie_tracker_app/pages/log_entry_view.dart';
 import 'package:flutter/material.dart';
 import 'package:calorie_tracker_app/app_state.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({required this.appState, super.key});
@@ -53,12 +54,59 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     if (_isLoggedIn) { //If there is a user signed in, show their Food Logs
       print('Console Print: Login status is $_isLoggedIn');
+      print('Console Print: The AppState Date is ${widget.appState.date}');
 
       return Scaffold(
         backgroundColor: const Color.fromARGB(255, 17, 17, 17),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: const BottomAppBar(
-          color: Color.fromARGB(255, 44, 44, 44),
+        bottomNavigationBar: BottomAppBar(
+          color: const Color.fromARGB(255, 44, 44, 44),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.calendar_today_rounded,
+                  color: Color.fromARGB(255, 255, 228, 141),
+                  shadows: <Shadow>[
+                    Shadow(
+                      blurRadius: 5,
+                      color: Color.fromARGB(255, 255, 228, 141),
+                    ),
+                  ],
+                ),
+                onPressed: () {
+                  //Change the date to 8-1-2024 for debug
+                  print('Attempt to change date');
+                  setState(() {
+                    widget.appState.date = '8-1-2024';
+                    widget.appState.fetchLogs('8-1-2024');
+                    print('Date is ${widget.appState.date}');
+                  });
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.calendar_month_rounded,
+                  color: Color.fromARGB(255, 255, 228, 141),
+                  shadows: <Shadow>[
+                    Shadow(
+                      blurRadius: 5,
+                      color: Color.fromARGB(255, 255, 228, 141),
+                    ),
+                  ],
+                ),
+                onPressed: () {
+                  //Change the date to current time for debug
+                  print('Attempt to change date');
+                  setState(() {
+                    String newDate = DateFormat('M-d-yyyy').format(DateTime.now());
+                    widget.appState.date = newDate;
+                    widget.appState.fetchLogs(newDate);
+                    print('Updated AppState Date is ${widget.appState.date}');
+                  });
+                },
+              ),
+            ],
+          ),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () => Navigator.of(context).push(
@@ -73,7 +121,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 17, 17, 17),
-          title: Text("${widget.appState.user?.email!.split('@').first}'s Daily Calorie Log", //Use the User's DisplayName
+          title: Text("${widget.appState.user?.email!.split('@').first}'s Calorie Log - ${widget.appState.date}", //Use the User's DisplayName
             style: const TextStyle(
               color: Color.fromARGB(255, 255, 228, 141),
               shadows: <Shadow>[
