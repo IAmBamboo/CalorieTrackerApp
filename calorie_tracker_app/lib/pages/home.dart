@@ -58,11 +58,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin  {
           color: Color.fromARGB(255, 44, 44, 44),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () => Navigator.of(context).push(
-            SlidePageRoute(
-              page: NoteView(appState: widget.appState),
-            ),
-          ),
+          onPressed: () => print('open + btn'),
+          // Navigator.of(context).push(
+          //   SlidePageRoute(
+          //     page: NoteView(appState: widget.appState),
+          //   ),
+          // ),
           backgroundColor: const Color.fromARGB(255, 255, 196, 0),
           foregroundColor: Colors.black,
           tooltip: 'Create New',
