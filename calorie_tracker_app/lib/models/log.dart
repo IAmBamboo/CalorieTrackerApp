@@ -9,7 +9,7 @@ class Log {
     });
 
   String? id;       // Unique ID for the log
-  String foodId;    // Unique ID for the food item used to find it in OpenFoodFact's database
+  String foodId;    // Barcode ID for the food item used to find it in OpenFoodFact's database
   String name;      // Name of the food item
   int calories;     // Number of calories
   String eatTime;   // Time when the food was eaten (e.g., breakfast, lunch, dinner, snack)
