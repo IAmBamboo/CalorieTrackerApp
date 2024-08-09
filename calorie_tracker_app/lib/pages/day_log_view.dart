@@ -38,7 +38,7 @@ class DayLogView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 39, 39, 39),
         title: Text(
-          "${appState.user?.email?.split('@').first ?? 'User'}'s Calorie Log - ${appState.date}",
+          "${appState.user?.email?.split('@').first ?? 'User'}'s Calorie Log - ${DateFormat('M-d-yyyy').format(appState.date!)}",
           style: const TextStyle(
             color: Color.fromARGB(255, 255, 228, 141),
             shadows: <Shadow>[
@@ -63,18 +63,21 @@ class DayLogView extends StatelessWidget {
             ),
             onPressed: () async {
               //Change the date to current time for debug
-              print('Attempt to change date');
+              print('Console Print: Attempt to change date');
               DateTime? pickDate = await showDatePicker(
                 context: context,
-                initialDate: DateTime.now(),
+                initialDate: appState.date,
                 firstDate: DateTime(2000),
                 lastDate: DateTime(2101),
               );
               if (pickDate != null) {
-                String newDate = DateFormat('M-d-yyyy').format(pickDate);
-                appState.date = newDate;
-                appState.fetchLogs(newDate);
-                print('Updated AppState Date is ${appState.date}');
+                appState.date = pickDate;
+                appState.fetchLogs(pickDate);
+                if (appState.date != null) {
+                  print('Console Print: Updated AppState Date is ${DateFormat('M-d-yyyy').format(appState.date!)}');
+                } else {
+                  print('Console Print: ERROR appState.date returned as NULL');
+                }
               }
             },
           ),
