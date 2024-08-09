@@ -4,10 +4,12 @@ class FoodProduct {
     required this.servingSize,
     required this.name,
     required this.quantity,
+    required this.foodId,
     });
 
   final String name;
-  final double? calories;
+  final int? calories;
   final String? servingSize;
   final String? quantity;
+  final String? foodId; // Barcode ID for the food item used to find it in OpenFoodFact's database
 }
