@@ -32,6 +32,7 @@ class Log {
       'calories': calories,
       'eatTime': eatTime,
       'name': name,
+      'foodId': foodId,
     };
   }
 }
