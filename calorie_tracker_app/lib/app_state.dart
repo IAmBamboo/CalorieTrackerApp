@@ -24,9 +24,9 @@ class AppState extends ChangeNotifier {
     _user = user;
   }
 
-  String? _date; // The date for which logs are fetched and managed
-  String? get date => _date;
-  set date(String? date) {
+  DateTime? _date; // The date for which logs are fetched and managed
+  DateTime? get date => _date;
+  set date(DateTime? date) {
     _date = date;
     notifyListeners();
   }
@@ -34,7 +34,7 @@ class AppState extends ChangeNotifier {
   List<Log>? _logs;
   List<Log>? get logs {
     if (user == null) {
-      print('Cannot get logs when user or date is null'); // If the User or Date is null, do not throw an error as the app will redirect the user to sign-in
+      print('Console Print: Cannot get logs when user or date is null'); // If the User or Date is null, do not throw an error as the app will redirect the user to sign-in
       return null;
     }
     return _logs;
@@ -51,7 +51,8 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void fetchLogs(String date) {
+  void fetchLogs(DateTime date) {
+    String dateString = DateFormat('M-d-yyyy').format(date);
     if (user == null) {
       //throw StateError('Cannot fetch logs when user or date is null');
       print('Console Print: Cannot fetch logs when user is null');
@@ -59,12 +60,12 @@ class AppState extends ChangeNotifier {
     }
 
     FirebaseFirestore.instance
-        .collection('/savedDays/${user!.uid}/savedDays/$date/foods')
+        .collection('/savedDays/${user!.uid}/savedDays/$dateString/foods')
         .get()
         .then((snapshot) {
           print('Console Print: Query completed with ${snapshot.docs.length} documents found');
           if (snapshot.docs.isEmpty) {
-            print('Console Print: No logs found for date $date');
+            print('Console Print: No logs found for date $dateString');
           }
           logs = snapshot.docs.map((doc) => Log.fromFirestore(doc)).toList();
           print('Console Print: Logs fetched and updated');
@@ -77,13 +78,13 @@ class AppState extends ChangeNotifier {
     required Log log, //Require a Log to be passed so we know what we're dealing with
     required VoidCallback onSuccess //A Callback to let us know when it finishes
     }) {
-
+    String dateString = DateFormat('M-d-yyyy').format(date!);
     if (user == null) {
       throw StateError('Cannot update a log when user is null');
     }
 
     FirebaseFirestore.instance
-      .collection('/savedDays/${user!.uid}/savedDays/${date!}/foods')
+      .collection('/savedDays/${user!.uid}/savedDays/$dateString/foods')
       .doc(log.id) //this needs to be changed (make sure we are setting a proper ID in logs model)
       .update(log.toMap())
       .then((_) {
@@ -98,12 +99,13 @@ class AppState extends ChangeNotifier {
     required Log log, //Require a Log to be passed so we know what we're dealing with
     required VoidCallback onSuccess //A Callback to let us know when it finishes
     }) {
+    String dateString = DateFormat('M-d-yyyy').format(date!);
     if (user == null) {
       throw StateError('Cannot delete a log when user is null');
     }
 
     FirebaseFirestore.instance
-      .collection('/savedDays/${user!.uid}/savedDays/${date!}/foods')
+      .collection('/savedDays/${user!.uid}/savedDays/$dateString/foods')
       .doc(log.id)
       .delete()
       .then((_) {
@@ -122,6 +124,7 @@ class AppState extends ChangeNotifier {
     required String eatTime, // Time when the food was eaten (e.g., breakfast, lunch, dinner, snack)
     required Function(String) onSuccess, //A Callback to let us know when it finishes
   }) {
+    String dateString = DateFormat('M-d-yyyy').format(date!);
     if (user == null) {
       throw StateError('Cannot add a log when user is null');
     }
@@ -134,7 +137,7 @@ class AppState extends ChangeNotifier {
     );
 
     FirebaseFirestore.instance
-      .collection('/savedDays/${user!.uid}/savedDays/${date!}/foods')
+      .collection('/savedDays/${user!.uid}/savedDays/$dateString/foods')
       .add(log.toMap())
       .then((DocumentReference doc) {
         log.id = doc.id;
@@ -143,7 +146,7 @@ class AppState extends ChangeNotifier {
         fetchLogs(_date!); //Update the locally stored logs
         onSuccess(doc.id); //A Callback to let us know when it finishes, pass through the newly created doc.id
       }).catchError((error) {
-      print('Failed to add log: $error');
+      print('Console Print: Failed to add log: $error');
     }
   );
 }
@@ -160,7 +163,7 @@ class AppState extends ChangeNotifier {
     ]);
 
     // Set date to show today
-    _date = DateFormat('M-d-yyyy').format(DateTime.now());
+    _date = DateTime.now();
     print('Console Print: Date set to $_date');
     notifyListeners();
 
