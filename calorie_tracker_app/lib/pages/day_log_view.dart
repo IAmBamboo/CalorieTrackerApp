@@ -36,7 +36,7 @@ class DayLogView extends StatelessWidget {
         ),
       backgroundColor: const Color.fromARGB(255, 17, 17, 17),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 17, 17, 17),
+        backgroundColor: const Color.fromARGB(255, 39, 39, 39),
         title: Text(
           "${appState.user?.email?.split('@').first ?? 'User'}'s Calorie Log - ${appState.date}",
           style: const TextStyle(
@@ -79,6 +79,22 @@ class DayLogView extends StatelessWidget {
             },
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(30.0),
+          child: Container(
+            color: Colors.red,
+            height: 30.0,
+            width: double.infinity,
+            alignment: Alignment.center,
+            child: const Text(
+              "Calories Consumed: 0",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
       ),
       body: logsList.isEmpty
           ? const Center(
