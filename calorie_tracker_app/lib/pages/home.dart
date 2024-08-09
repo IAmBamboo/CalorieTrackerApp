@@ -3,6 +3,7 @@ import 'package:calorie_tracker_app/pages/day_log_view.dart';
 import 'package:calorie_tracker_app/pages/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:calorie_tracker_app/app_state.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({required this.appState, super.key});
@@ -61,7 +62,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     if (_isLoggedIn) { //If there is a user signed in, show their Food Logs
       print('Console Print: Login status is $_isLoggedIn');
-      print('Console Print: The AppState Date is ${widget.appState.date}');
+      if (widget.appState.date != null) {
+        print('Console Print: Updated AppState Date is ${DateFormat('M-d-yyyy').format(widget.appState.date!)}');
+      } else {
+        print('Console Print: ERROR widget.appState.date returned as NULL');
+      }
 
       return Scaffold(
         backgroundColor: const Color.fromARGB(255, 17, 17, 17),
