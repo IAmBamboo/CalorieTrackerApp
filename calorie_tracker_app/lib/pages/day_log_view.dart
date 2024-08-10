@@ -23,6 +23,8 @@ class DayLogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     int totalCalories = logsList.fold(0, (sum, log) => sum + log.calories);
+    int caloriesLimit = 1800;
+
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
         floatingActionButton: FloatingActionButton(
@@ -94,10 +96,10 @@ class DayLogView extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Column(
+                Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       "Budget",
                       style: TextStyle(
                         color: Color.fromARGB(255, 255, 242, 199),
@@ -106,8 +108,8 @@ class DayLogView extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "0",
-                      style: TextStyle(
+                      "${caloriesLimit-totalCalories}",
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 16.0,
@@ -138,10 +140,10 @@ class DayLogView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(width: 40.0),
-                const Column(
+                Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       "Limit",
                       style: TextStyle(
                         color: Color.fromARGB(255, 255, 242, 199),
@@ -150,8 +152,8 @@ class DayLogView extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "1800",
-                      style: TextStyle(
+                      "$caloriesLimit",
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 16.0,
