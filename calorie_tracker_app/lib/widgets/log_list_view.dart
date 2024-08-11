@@ -90,7 +90,7 @@ class LogListView extends StatelessWidget {
                           ),
                         ),
                         subtitle: Text(
-                          'Calories: ${log.calories.toString()} from ${log.servingMeasured.toString()}${log.servingUnit}\nOpenFoodFacts BarCode ID:${log.foodId}',
+                          '${log.calories.toString()} cal from ${log.servingMeasured.toString()}${log.servingUnit}\nOpenFoodFacts BarCode ID:${log.foodId}',
                           maxLines: isExpanded ? null : 1,
                           overflow: isExpanded
                               ? TextOverflow.visible
