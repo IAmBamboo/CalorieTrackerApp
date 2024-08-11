@@ -41,10 +41,6 @@ class ProductLogView extends StatelessWidget {
               children: [
                 if (singleProduct?.imageUrl?.isNotEmpty ?? false)
                   const SizedBox(height: 40), //Padding
-                Text(
-                  'Serving Size: ${singleProduct?.calories.toString() ?? 'Unknown'} cals per ${singleProduct?.servingSize ?? 'Unknown'}.',
-                  style: const TextStyle(color: Colors.white),
-                ),
                 if (log != null)
                 Text(
                   "You logged: ${log?.calories.toString()} calories from ${log?.servingMeasured.toString()}${log?.servingUnit}",
@@ -54,10 +50,16 @@ class ProductLogView extends StatelessWidget {
             ),
             const SizedBox(height: 20), //Padding
             const Text('Nutritional Facts', style: TextStyle(color: Colors.white, fontSize: 17)),
+            Text('Per serving of ${singleProduct?.servingSize ?? 'Unknown'}', style: const TextStyle(color: Colors.white, fontSize: 17)),
             const SizedBox(height: 20), //Padding
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  'Calories: ${singleProduct?.calories != null ? '${singleProduct?.calories.toString()} cal' : 'No data'}',
+                  style: const TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 6),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
