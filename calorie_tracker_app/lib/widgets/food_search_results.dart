@@ -104,6 +104,7 @@ class _FoodProductListState extends State<FoodSearchResultsList> {
                         ],
                       ),
                       trailing: PopupMenuButton(
+                        color: const Color.fromARGB(255, 39, 39, 39),
                         iconColor: const Color.fromARGB(255, 255, 196, 0),
                         onSelected: (value) {
                           switch (value) {
@@ -119,11 +120,21 @@ class _FoodProductListState extends State<FoodSearchResultsList> {
                           return const [
                             PopupMenuItem(
                               value: 'add',
-                              child: Text("Add to Log"),
+                              child: Text("Add to Log",
+                                style: TextStyle(
+                                    color: Color.fromARGB(255, 190, 190, 190),
+                                    fontSize: 14,
+                                  ),
+                              ),
                             ),
                             PopupMenuItem(
                               value: 'open',
-                              child: Text("View Product"),
+                              child: Text("View Product",
+                                style: TextStyle(
+                                    color: Color.fromARGB(255, 190, 190, 190),
+                                    fontSize: 14,
+                                  ),
+                              ),
                             ),
                           ];
                         },

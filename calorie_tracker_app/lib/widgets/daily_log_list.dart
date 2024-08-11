@@ -130,6 +130,7 @@ class DailyLogList extends StatelessWidget {
                               ],
                             ),
                         trailing: PopupMenuButton(
+                          color: const Color.fromARGB(255, 39, 39, 39),
                           iconColor: const Color.fromARGB(255, 255, 196, 0),
                           onSelected: (value) {
                             switch (value) {
@@ -156,11 +157,21 @@ class DailyLogList extends StatelessWidget {
                             return const [
                               PopupMenuItem(
                                 value: 'open',
-                                child: Text("View Log"),
+                                child: Text("View Log",
+                                  style: TextStyle(
+                                    color: Color.fromARGB(255, 190, 190, 190),
+                                    fontSize: 14,
+                                  ),
+                                ),
                               ),
                               PopupMenuItem(
                                 value: 'delete',
-                                child: Text("Delete"),
+                                child: Text("Delete",
+                                  style: TextStyle(
+                                    color: Color.fromARGB(255, 190, 190, 190),
+                                    fontSize: 14,
+                                  ),
+                                ),
                               ),
                             ];
                           },
