@@ -164,10 +164,11 @@ class _AddFoodLogPopupState extends State<AddFoodLogPopup> {
           onPressed: () {
             if (selectedEatTime != null) { //make sure they selected an eatTime
               double? userEnteredAmount = double.tryParse(servingController.text); //get user input
-
-              if (userEnteredAmount != null && servingSize != null) {
+              if (userEnteredAmount != null && !userEnteredAmount.isNaN && !userEnteredAmount.isInfinite &&
+                servingSize != null && !servingSize!.isNaN && !servingSize!.isInfinite) {
                 double calcCalories = (userEnteredAmount / servingSize!) * (widget.product.calories ?? 0); //Calc new calories from input and servingsize
                 int totalCalories = calcCalories.toInt(); //Convert to int
+                
                 widget.appState.addLog( //Add log
                   foodId: widget.product.foodId ?? 'no_bar_code',
                   name: widget.product.name,
@@ -200,15 +201,14 @@ class _AddFoodLogPopupState extends State<AddFoodLogPopup> {
   /// - servingSizeText: The string to be parsed
   double? _parseServingSize(String? servingSizeText) {
     if (servingSizeText == null || servingSizeText.isEmpty) {
+      print('Console Print: servingSizeText is null or empty! String:$servingSizeText');
       return 0; //Return 0 incase we can't find anything
     }
-    final match = RegExp(r'\b(\d+(\.\d+)?)\b').allMatches(servingSizeText);
-    if (match.isNotEmpty) {
-      final numbers = match.map((m) => m.group(0)).toList();
-      if (numbers.isNotEmpty) {
-        return double.tryParse(numbers.first!);
-      }
+    final match = RegExp(r'(\d+(\.\d+)?)').firstMatch(servingSizeText);
+    if (match != null) {
+      return double.tryParse(match.group(0)!);
     }
+    print('Console Print: we cant find anything to parse string! String:$servingSizeText');
     return 0; //Return 0 incase we can't find anything
   }
 }
