@@ -46,41 +46,60 @@ class AppState extends ChangeNotifier {
     }
 
     FirebaseFirestore.instance
-        .collection('/savedUsers/${user!.uid}/userSettings')
-        .get()
-        .then((snapshot) {
-          print('Console Print: User Settings query completed with ${snapshot.docs.length} documents found');
-          if (snapshot.docs.isEmpty) {
-            //No previous settings were found, create defaults
-            print('Console Print: No user settings found');
-            FirebaseFirestore.instance
-              .collection('/savedUsers/${user!.uid}/userSettings')
-              .doc('caloriesLimit')
-              .set({'userSet': 1800})
-              .then((_) {
-                print('Console Print: Created caloriesLimit document with default value 1800');
-                caloriesLimit = 1800;
-              }).catchError((error) {
-                print('Console Print: Error creating caloriesLimit document: $error');
-              });
-            return;
+      .collection('/savedUsers/${user!.uid}/userSettings')
+      .get()
+      .then((snapshot) {
+        print('Console Print: User Settings query completed with ${snapshot.docs.length} documents found');
+        if (snapshot.docs.isEmpty) {
+          //No previous settings were found, create defaults
+          print('Console Print: No user settings found');
+          FirebaseFirestore.instance
+            .collection('/savedUsers/${user!.uid}/userSettings')
+            .doc('caloriesLimit')
+            .set({'userSet': 1800})
+            .then((_) {
+              print('Console Print: Created caloriesLimit document with default value 1800');
+              caloriesLimit = 1800;
+            }).catchError((error) {
+              print('Console Print: Error creating caloriesLimit document: $error');
+            });
+          return;
+        }
+
+        for (var doc in snapshot.docs) {
+          if (doc.id == 'caloriesLimit') {
+            caloriesLimit = doc.data()['userSet']?.toInt();
           }
+        }
 
-          for (var doc in snapshot.docs) {
-            if (doc.id == 'caloriesLimit') {
-              caloriesLimit = doc.data()['userSet']?.toInt();
-            }
-          }
+        // Set userSettings object
+        userSettings = UserSettings(
+          caloriesLimit: caloriesLimit!,
+        );
 
-          // Set userSettings object
-          userSettings = UserSettings(
-            caloriesLimit: caloriesLimit!,
-          );
+        print('Console Print: User settings fetched and updated');
+        print('Console Print: User calories limit is $caloriesLimit');
+      }).catchError((error) {
+        print('Console Print: Error fetching user settings: $error');
+    });
+  }
 
-          print('Console Print: User settings fetched and updated');
-          print('Console Print: User calories limit is $caloriesLimit');
-        }).catchError((error) {
-      print('Console Print: Error fetching user settings: $error');
+  void updateUserSettings({required UserSettings userSettings}) {
+    if (user == null) {
+      throw StateError('Cannot update user settings when user is null');
+    }
+
+    // Get a reference to the user's settings document
+    final userSettingsCollection = FirebaseFirestore.instance
+        .collection('savedUsers/${user!.uid}/userSettings');
+
+    // Update the caloriesLimit document
+    userSettingsCollection
+        .doc('caloriesLimit')
+        .update({'userSet': userSettings.caloriesLimit}).then((_) {
+      print('Console Print: User settings updated successfully');
+    }).catchError((error) {
+      print('Console Print: Failed to update user settings: $error');
     });
   }
 
