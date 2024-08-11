@@ -1,6 +1,6 @@
 import 'package:calorie_tracker_app/app_state.dart';
 import 'package:flutter/material.dart';
-import 'package:calorie_tracker_app/widgets/splash.dart';
+import 'package:calorie_tracker_app/pages/splash.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
