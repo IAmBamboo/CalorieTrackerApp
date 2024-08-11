@@ -3,6 +3,15 @@ import 'package:calorie_tracker_app/pages/log_entry_view.dart';
 import 'package:flutter/material.dart';
 import 'package:calorie_tracker_app/models/log.dart';
 
+/// Builds an animated widget list of Log entries.
+/// A sectioned list of various eatTime's which will group the log entries under the appropriate section
+/// The list is expandable to display additional information of each log entry.
+///
+/// Arguments:
+/// - logsList: The list of Logs to build a list of
+/// - onTileTap: An integer used to find which tile is tapped
+/// - expandedTile: An integer used to find which tile is expanded
+/// - appState: The appState to be passed
 class DailyLogList extends StatelessWidget {
   final List<Log> logsList;
   final ValueChanged<int> onTileTap;

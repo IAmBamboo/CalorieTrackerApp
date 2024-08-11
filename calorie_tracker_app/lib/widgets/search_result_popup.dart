@@ -2,6 +2,12 @@ import 'package:calorie_tracker_app/widgets/product_log_view.dart';
 import 'package:flutter/material.dart';
 import 'package:calorie_tracker_app/models/food_product.dart';
 
+/// A Popup window that uses the provided product to call for a ProductLogView
+/// The widget is used when navigation is not ideal but we still need to call for a ProductLogView and display
+/// its information.
+/// Arguments:
+/// - context: The BuildContext to be passed
+/// - product: A FoodProduct to display information of
 void searchResultPopup(BuildContext context, FoodProduct product) {
   showDialog(
     context: context,

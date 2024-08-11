@@ -85,9 +85,13 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
+  /// Builds a pop up window that allows the user to set their daily calorie limit
+  /// It will pass through the user input to the appstate to update onto the server
+  /// their new calorie limit.
+  /// Arguments:
+  /// - context: The BuildContext to be passed
   Future<void> _showCalorieLimitPopup(BuildContext context) async {
     final TextEditingController calorieLimitController = TextEditingController();
-    int? newCalorieLimit;
 
     return showDialog<void>(
       context: context,
@@ -175,7 +179,6 @@ class SettingsPage extends StatelessWidget {
             TextButton(
               child: const Text('Add'),
               onPressed: () {
-                print('Console Print: User clicked with input of ${calorieLimitController.text}');
                 int? userEnteredAmount = int.tryParse(calorieLimitController.text);
                 if (userEnteredAmount != null) {
                   final currentUserSettings = appState.userSettings;

@@ -2,6 +2,12 @@ import 'package:calorie_tracker_app/models/food_product.dart';
 import 'package:calorie_tracker_app/models/log.dart';
 import 'package:flutter/material.dart';
 
+/// Builds a scrollable container which displays various information of the FoodProduct and if available, the Log entry
+/// The widget will display accessible information about the FoodProduct such as Nutritional information and an Image
+/// If a Log entry is provided, it will display the calories and servings consumed by the user for that Log entry
+/// Arguments:
+/// - singleProduct: The FoodProduct to display information of
+/// - log: A log entry if available, to get access to consumption info
 class ProductLogView extends StatelessWidget {
   final FoodProduct? singleProduct;
   final Log? log;
