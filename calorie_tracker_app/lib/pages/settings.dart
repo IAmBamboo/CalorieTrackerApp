@@ -178,7 +178,14 @@ class SettingsPage extends StatelessWidget {
                 print('Console Print: User clicked with input of ${calorieLimitController.text}');
                 int? userEnteredAmount = int.tryParse(calorieLimitController.text);
                 if (userEnteredAmount != null) {
-                  //update settings
+                  final currentUserSettings = appState.userSettings;
+                  if (currentUserSettings != null) {
+                    currentUserSettings.caloriesLimit = userEnteredAmount;
+                    appState.updateUserSettings(userSettings: currentUserSettings);
+                    Navigator.of(context).pop();
+                  } else {
+                    print('Console Print: userSettings is null, cannot update.');
+                  }
                 }
               },
             ),
