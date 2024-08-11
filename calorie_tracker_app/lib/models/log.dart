@@ -22,7 +22,7 @@ class Log {
   factory Log.fromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     final data = snapshot.data();
     return Log(
-      id: snapshot.id,             // Temporarily use the document ID as foodId, this will need to be changed
+      id: snapshot.id,
       foodId: data?['foodId'],
       calories: data?['calories'],
       eatTime: data?['eatTime'],
