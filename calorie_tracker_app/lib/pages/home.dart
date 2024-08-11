@@ -65,21 +65,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Color.fromARGB(255, 17, 17, 17),
-        body: Center(
-          child: CircularProgressIndicator(
-            color: Color.fromARGB(255, 255, 196, 0),
-          ),
-        ),
-      );
-    }
     if (_isLoggedIn) { //If there is a user signed in, show their Food Logs
       if (widget.appState.date != null) {
         print('Console Print: home.dart AppState Date is ${DateFormat('M-d-yyyy').format(widget.appState.date!)}');
       } else {
         print('Console Print: home.dart ERROR widget.appState.date returned as NULL');
+      }
+      if (_isLoading) {
+        return const Scaffold(
+          backgroundColor: Color.fromARGB(255, 17, 17, 17),
+          body: Center(
+            child: CircularProgressIndicator(
+              color: Color.fromARGB(255, 255, 196, 0),
+            ),
+          ),
+        );
       }
 
       return Scaffold(
