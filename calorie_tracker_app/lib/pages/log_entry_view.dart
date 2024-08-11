@@ -107,7 +107,6 @@ class _LogEntryViewState extends State<LogEntryView> {
         _searchMessage = 'Error fetching search results, code: ${response.statusCode}';
         _isLoading = false;
       });
-      // Handle
     }
   }
 
@@ -181,7 +180,7 @@ class _LogEntryViewState extends State<LogEntryView> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.search, color: Color.fromARGB(255, 255, 228, 141)), // Use a search icon
+                      icon: const Icon(Icons.search, color: Color.fromARGB(255, 255, 228, 141)),
                       onPressed: () {
                         _searchFood(_searchQuery);
                       },
@@ -334,7 +333,6 @@ class _LogEntryViewState extends State<LogEntryView> {
                         switch (value) {
                           case 'add':
                             print('Console Print: Add to log');
-                            // NEED TO LET USER INPUT HOW MANY SERVINGS THEY HAD AND AT WHAT TIME THEY ATE
                             _showAddPopup(context, product); // Show dialog to get additional input
                             break;
                             case 'open':
@@ -372,14 +370,18 @@ class _LogEntryViewState extends State<LogEntryView> {
     final TextEditingController servingController = TextEditingController();
     String? errorMessage;
     String? servingSizeText;
-    int? servingSize;
+    double? servingSize;
 
     if (product.servingSize == '100g/100ml') {
       servingSizeText = 'g/ml';
       servingSize = 100;
     } else {
       servingSizeText = product.servingSize?.replaceAll(RegExp(r'[0-9]'), '') ?? '';
-      servingSize = int.tryParse(product.servingSize!.replaceAll(RegExp(r'[a-zA-Z]'), ''));
+      servingSize = double.tryParse(
+      product.servingSize!
+        .replaceAll(RegExp(r'[^\d.]'), '')
+        .replaceAll(RegExp(r'\.(?=.*\.)'), '')
+      );
     }
 
     return showDialog<void>(
