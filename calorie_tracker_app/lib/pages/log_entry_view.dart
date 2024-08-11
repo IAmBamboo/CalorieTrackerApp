@@ -1,6 +1,7 @@
 import "package:calorie_tracker_app/app_state.dart";
 import "package:calorie_tracker_app/models/food_product.dart";
 import "package:calorie_tracker_app/models/log.dart";
+import "package:calorie_tracker_app/widgets/product_log_view.dart";
 import "package:flutter/material.dart";
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -87,6 +88,16 @@ class _LogEntryViewState extends State<LogEntryView> {
         final String imageUrl = product.containsKey('image_url') && product['image_url'].isNotEmpty
           ? product['image_url']
           : '';
+        // Extracting nutritional information
+        final double? totalFat = nutriments.containsKey('fat') ? (nutriments['fat'] as num).toDouble() : null;
+        final double? saturatedFat = nutriments.containsKey('saturated-fat') ? (nutriments['saturated-fat'] as num).toDouble() : null;
+        final double? transFat = nutriments.containsKey('trans-fat') ? (nutriments['trans-fat'] as num).toDouble() : null;
+        final int? cholesterol = nutriments.containsKey('cholesterol') ? (nutriments['cholesterol'] as num).toInt() : null;
+        final int? sodium = nutriments.containsKey('sodium') ? (nutriments['sodium'] as num).toInt() : null;
+        final double? totalCarbohydrates = nutriments.containsKey('carbohydrates') ? (nutriments['carbohydrates'] as num).toDouble() : null;
+        final double? dietaryFiber = nutriments.containsKey('fiber') ? (nutriments['fiber'] as num).toDouble() : null;
+        final double? sugars = nutriments.containsKey('sugars') ? (nutriments['sugars'] as num).toDouble() : null;
+        final double? proteins = nutriments.containsKey('proteins') ? (nutriments['proteins'] as num).toDouble() : null;
 
         int? calories;
         String? servingSize = originalServingSize;
@@ -107,6 +118,15 @@ class _LogEntryViewState extends State<LogEntryView> {
           servingSize: servingSize,
           quantity: quantity,
           foodId: barCodeId,
+          totalFat: totalFat,
+          saturatedFat: saturatedFat,
+          transFat: transFat,
+          cholesterol: cholesterol,
+          sodium: sodium,
+          totalCarbohydrates: totalCarbohydrates,
+          dietaryFiber: dietaryFiber,
+          sugars: sugars,
+          proteins: proteins,
           imageUrl: imageUrl
         );
       }).toList();
@@ -228,31 +248,11 @@ class _LogEntryViewState extends State<LogEntryView> {
                 if (_isLoading)
                   const CircularProgressIndicator()
                 else
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (singleProduct!.imageUrl!.isNotEmpty)
-                      SizedBox(
-                        width: 400, // Set the desired width
-                        height: 400, // Set the desired height
-                        child: Image.network(
-                          singleProduct?.imageUrl ?? '',
-                          fit: BoxFit.contain, // Scales the image to cover the box
-                        ),
-                      ),
-                      Text("Barcode ID: $_foodId", style: const TextStyle(color: Colors.white)),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (singleProduct!.imageUrl!.isNotEmpty)
-                            const SizedBox(height: 40), //Padding
-                          Text('Serving Size: ${singleProduct?.calories.toString() ?? 'Unknown'} cals per ${singleProduct?.servingSize ?? 'Unknown'}.', 
-                            style: const TextStyle(color: Colors.white)
-                          ),
-                          Text("You logged: ${widget.log!.calories.toString()} calories from ${widget.log!.servingMeasured.toString()}${widget.log!.servingUnit}", style: const TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                    ],
+                  Expanded(
+                    child: ProductLogView(
+                      singleProduct: singleProduct,
+                      log: widget.log,
+                    ),
                   ),
               //CLEAN THIS UP
               if (_isNewLog) 
@@ -305,106 +305,110 @@ class _LogEntryViewState extends State<LogEntryView> {
   /// Arguments:
   /// - logs: A List<Log> containing the logs to be displayed.
   Widget _buildList(List<FoodProduct> query) {
-    return ListView.builder(
-      itemCount: query.length,
-      itemBuilder: (context, index) {
-        final FoodProduct product = query[index];
-        final bool isExpanded = _expandedTile == index;
+    return Scrollbar(
+      thumbVisibility: true,
+      child: ListView.builder(
+        itemCount: query.length,
+        itemBuilder: (context, index) {
+          final FoodProduct product = query[index];
+          final bool isExpanded = _expandedTile == index;
 
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              _expandedTile = isExpanded ? null : index; //Toggle expansion state
-              Feedback.forTap(context);
-              //Handle
-            });
-          },
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOutQuint,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: isExpanded ? const Color.fromARGB(255, 255, 228, 141) : Colors.grey,
-                    width: 2.0,
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _expandedTile = isExpanded ? null : index; //Toggle expansion state
+                Feedback.forTap(context);
+                //Handle
+              });
+            },
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutQuint,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isExpanded ? const Color.fromARGB(255, 255, 228, 141) : Colors.grey,
+                      width: 2.0,
+                    ),
                   ),
                 ),
-              ),
-              child: Column(
-                children: [
-                  ListTile(
-                    title: Text(
-                      '${product.name} ${product.quantity!.isNotEmpty ? '- ${product.quantity}' : ''}', 
-                      style: const TextStyle(
-                        color: Color.fromARGB(255, 255, 242, 199),
+                child: Column(
+                  children: [
+                    ListTile(
+                      title: Text(
+                        '${product.name} ${product.quantity!.isNotEmpty ? '- ${product.quantity}' : ''}', 
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 255, 242, 199),
+                          shadows: <Shadow>[
+                            Shadow(
+                              blurRadius: 2,
+                              color: Color.fromARGB(255, 255, 228, 141),
+                            ),
+                          ],
+                        ),
+                      ),
+                      subtitle: Text('${product.calories?.toString() ?? 'Unknown'} cals per ${product.servingSize ?? 'Unknown'}. Product ID ${product.foodId}', 
+                        maxLines: isExpanded ? null : 1, 
+                        overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 190, 190, 190),
+                        ),
+                      ),
+                      leading: isExpanded ? 
+                      const Icon(Icons.keyboard_arrow_up_rounded, 
+                        color: Color.fromARGB(255, 255, 196, 0),
                         shadows: <Shadow>[
                           Shadow(
-                            blurRadius: 2,
-                            color: Color.fromARGB(255, 255, 228, 141),
+                            blurRadius: 5,
+                            color: Color.fromARGB(255, 255, 196, 0),
+                          ),
+                        ],
+                      )
+                      : const Icon(Icons.keyboard_arrow_down_rounded, 
+                        color: Color.fromARGB(255, 255, 196, 0),
+                        shadows: <Shadow>[
+                          Shadow(
+                            blurRadius: 5,
+                            color: Color.fromARGB(255, 255, 196, 0),
                           ),
                         ],
                       ),
-                    ),
-                    subtitle: Text('${product.calories?.toString() ?? 'Unknown'} cals per ${product.servingSize ?? 'Unknown'}. Product ID ${product.foodId}', 
-                      maxLines: isExpanded ? null : 1, 
-                      overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color.fromARGB(255, 190, 190, 190),
+                      trailing: PopupMenuButton(
+                        iconColor: const Color.fromARGB(255, 255, 196, 0),
+                        onSelected: (value) {
+                          switch (value) {
+                            case 'add':
+                              print('Console Print: Add to log');
+                              _showAddPopup(context, product); // Show dialog to get additional input
+                              break;
+                              case 'open':
+                              print('Console Print: Open search result');
+                              
+                              break;
+                          }
+                        },
+                        itemBuilder: (BuildContext bc) {
+                          return const [
+                            PopupMenuItem(
+                              value: 'add',
+                              child: Text("Add to Log"),
+                            ),
+                            PopupMenuItem(
+                              value: 'open',
+                              child: Text("View Product"),
+                            ),
+                          ];
+                        },
                       ),
-                    ),
-                    leading: isExpanded ? 
-                    const Icon(Icons.keyboard_arrow_up_rounded, 
-                      color: Color.fromARGB(255, 255, 196, 0),
-                      shadows: <Shadow>[
-                        Shadow(
-                          blurRadius: 5,
-                          color: Color.fromARGB(255, 255, 196, 0),
-                        ),
-                      ],
                     )
-                    : const Icon(Icons.keyboard_arrow_down_rounded, 
-                      color: Color.fromARGB(255, 255, 196, 0),
-                      shadows: <Shadow>[
-                        Shadow(
-                          blurRadius: 5,
-                          color: Color.fromARGB(255, 255, 196, 0),
-                        ),
-                      ],
-                    ),
-                    trailing: PopupMenuButton(
-                      iconColor: const Color.fromARGB(255, 255, 196, 0),
-                      onSelected: (value) {
-                        switch (value) {
-                          case 'add':
-                            print('Console Print: Add to log');
-                            _showAddPopup(context, product); // Show dialog to get additional input
-                            break;
-                            case 'open':
-                            print('Console Print: Open search result');
-                            break;
-                        }
-                      },
-                      itemBuilder: (BuildContext bc) {
-                        return const [
-                          PopupMenuItem(
-                            value: 'add',
-                            child: Text("Add to Log"),
-                          ),
-                          PopupMenuItem(
-                            value: 'open',
-                            child: Text("View Product"),
-                          ),
-                        ];
-                      },
-                    ),
-                  )
-                ],
-              ),
+                  ],
+                ),
+              )
             )
-          )
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
