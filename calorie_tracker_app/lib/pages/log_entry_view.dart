@@ -29,6 +29,8 @@ class _LogEntryViewState extends State<LogEntryView> {
   bool _isLoading = false;
   int? _expandedTile; //Used to control which ListTile is expanded
 
+  String? selectedEatTime;
+
   @override
   void initState() {
     super.initState();
@@ -66,15 +68,16 @@ class _LogEntryViewState extends State<LogEntryView> {
         final String? originalServingSize = product['serving_size'];
         final String productName = product['product_name'] ?? 'Unknown product';
         final String? quantity = product['quantity'] ?? '';
+        final String? barCodeId = product['code'] ?? 'Unknown barcode';
 
-        double? calories;
+        int? calories;
         String? servingSize = originalServingSize;
 
         if (nutriments.containsKey('energy-kcal_serving')) {
-          calories = nutriments['energy-kcal_serving'].toDouble();
+          calories = nutriments['energy-kcal_serving'].toInt();
         } else if (nutriments.containsKey('energy-kcal_100g')) {
           //resort to 100g/100ml stats if no cal per serving is found
-          calories = nutriments['energy-kcal_100g'].toDouble();
+          calories = nutriments['energy-kcal_100g'].toInt();
           servingSize = '100g/100ml';
         } else {
           calories = null;
@@ -85,6 +88,7 @@ class _LogEntryViewState extends State<LogEntryView> {
           calories: calories, 
           servingSize: servingSize,
           quantity: quantity,
+          foodId: barCodeId
         );
       }).toList();
 
@@ -287,7 +291,7 @@ class _LogEntryViewState extends State<LogEntryView> {
                 children: [
                   ListTile(
                     title: Text(
-                      '${product.name} - ${product.quantity}', 
+                      '${product.name} ${product.quantity!.isNotEmpty ? '- ${product.quantity}' : ''}', 
                       style: const TextStyle(
                         color: Color.fromARGB(255, 255, 242, 199),
                         shadows: <Shadow>[
@@ -298,7 +302,7 @@ class _LogEntryViewState extends State<LogEntryView> {
                         ],
                       ),
                     ),
-                    subtitle: Text('${product.calories?.toString() ?? 'Unknown'} cals per ${product.servingSize ?? 'Unknown'}', 
+                    subtitle: Text('${product.calories?.toString() ?? 'Unknown'} cals per ${product.servingSize ?? 'Unknown'}. Product ID ${product.foodId}', 
                       maxLines: isExpanded ? null : 1, 
                       overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -328,24 +332,26 @@ class _LogEntryViewState extends State<LogEntryView> {
                       iconColor: const Color.fromARGB(255, 255, 196, 0),
                       onSelected: (value) {
                         switch (value) {
-                          case 'open':
-                            print('open search result');
+                          case 'add':
+                            print('Console Print: Add to log');
+                            // NEED TO LET USER INPUT HOW MANY SERVINGS THEY HAD AND AT WHAT TIME THEY ATE
+                            _showAddPopup(context, product); // Show dialog to get additional input
                             break;
-                          // case 'delete':
-                          //   print('delete search result')
-                          //   break;
+                            case 'open':
+                            print('Console Print: Open search result');
+                            break;
                         }
                       },
                       itemBuilder: (BuildContext bc) {
                         return const [
                           PopupMenuItem(
+                            value: 'add',
+                            child: Text("Add to Log"),
+                          ),
+                          PopupMenuItem(
                             value: 'open',
                             child: Text("View Product"),
                           ),
-                          // PopupMenuItem(
-                          //   value: 'delete',
-                          //   child: Text("Delete"),
-                          // ),
                         ];
                       },
                     ),
@@ -359,4 +365,180 @@ class _LogEntryViewState extends State<LogEntryView> {
     );
   }
 
+
+
+  Future<void> _showAddPopup(BuildContext context, FoodProduct product) async {
+    final List<String> eatTimeOptions = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+    final TextEditingController servingController = TextEditingController();
+    String? errorMessage;
+    String? servingSizeText;
+    int? servingSize;
+
+    if (product.servingSize == '100g/100ml') {
+      servingSizeText = 'g/ml';
+      servingSize = 100;
+    } else {
+      servingSizeText = product.servingSize?.replaceAll(RegExp(r'[0-9]'), '') ?? '';
+      servingSize = int.tryParse(product.servingSize!.replaceAll(RegExp(r'[a-zA-Z]'), ''));
+    }
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              backgroundColor: const Color.fromARGB(255, 31, 31, 31),
+              title: Text(
+                '${product.name} ${product.quantity?.isNotEmpty == true ? '- ${product.quantity}' : ''}\n${product.calories?.toString() ?? 'Unknown'} cals per ${product.servingSize ?? 'Unknown'}',
+                maxLines: 3,
+                overflow: TextOverflow.visible,
+                style: const TextStyle(
+                  color: Color.fromARGB(255, 255, 242, 199),
+                  fontSize: 20,
+                  shadows: <Shadow>[
+                    Shadow(
+                      blurRadius: 2,
+                      color: Color.fromARGB(255, 255, 228, 141),
+                    ),
+                  ],
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Row(
+                    children: [
+                      const Text('I ate this at ',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: DropdownButton<String>(
+                          dropdownColor: const Color.fromARGB(255, 25, 25, 25),
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 190, 190, 190),
+                            fontSize: 14,
+                          ),
+                          hint: const Text("Select a time",
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 190, 190, 190),
+                              fontSize: 14,
+                            ),
+                          ),
+                          value: selectedEatTime,
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedEatTime = newValue;
+                            });
+                          },
+                          items: eatTimeOptions.map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextField(
+                              controller: servingController,
+                              keyboardType: TextInputType.number,
+                              style: const TextStyle(
+                                color: Color.fromARGB(255, 190, 190, 190),
+                              ),
+                              decoration: const InputDecoration(
+                                hintText: 'Enter how much you ate',
+                                hintStyle: TextStyle(
+                                  color: Color.fromARGB(255, 190, 190, 190),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            if (errorMessage != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                errorMessage!,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      ),
+                      const SizedBox(width: 8),
+                      Text(servingSizeText!,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    selectedEatTime = null;
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text('Add'),
+                  onPressed: () {
+                    if (selectedEatTime != null) {
+                      int? userEnteredAmount = int.tryParse(servingController.text);
+                      if (userEnteredAmount != null && servingSize != null) {
+                        double calcCalories = (userEnteredAmount / servingSize) * (product.calories ?? 0);
+                        int totalCalories = calcCalories.toInt();
+                        print('Console Print: $userEnteredAmount / $servingSize * ${product.calories}');
+                        print('Console Print: Calculated calories to $totalCalories');
+                        print('Console Print: set servingUnit to $servingSizeText');
+                        widget.appState.addLog(
+                          foodId: product.foodId ?? 'default_food_id',
+                          name: product.name,
+                          calories: totalCalories,
+                          eatTime: selectedEatTime!,
+                          servingUnit: servingSizeText!,
+                          servingMeasured: userEnteredAmount,
+                          onSuccess: (logId) {
+                            print('Console Print: Log added successfully with ID: $logId');
+                          },
+                        );
+                        Navigator.of(context).pop();
+                      } else {
+                        setState(() {
+                          errorMessage = 'Please enter a valid amount!';
+                        });
+                      }
+                    } else {
+                      setState(() {
+                        errorMessage = 'Please select the time of consumption!';
+                      });
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 }
