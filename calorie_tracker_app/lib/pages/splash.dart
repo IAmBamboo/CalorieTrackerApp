@@ -2,6 +2,8 @@ import 'package:calorie_tracker_app/pages/main_app.dart';
 import 'package:flutter/material.dart';
 import 'package:calorie_tracker_app/app_state.dart';
 
+//This is a splash screen used to render something so the app doesn't glitch out
+//before the appstate is able to initialize and provide a user status
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();

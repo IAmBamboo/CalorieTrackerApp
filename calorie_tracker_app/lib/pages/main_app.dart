@@ -10,7 +10,7 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final routes = {
+    final routes = { //Handle navigation
       '/': (context) {
         return HomePage(appState: appState); // Default page is the Home Page
       },
@@ -51,7 +51,7 @@ class MainApp extends StatelessWidget {
     };
 
     return MaterialApp(
-      title: 'Notes App',
+      title: 'Calories App',
       routes: routes,
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
