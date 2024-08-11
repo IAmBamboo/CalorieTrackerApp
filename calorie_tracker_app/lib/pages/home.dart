@@ -155,7 +155,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           },
         );
       case 1:
-        return const SettingsPage();
+        return SettingsPage(
+          appState: widget.appState,
+        );
       default:
         return const Center(
           child: Text(
