@@ -1,7 +1,12 @@
+import 'package:calorie_tracker_app/app_state.dart';
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+  final AppState appState;
+  const SettingsPage({
+    required this.appState,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +42,13 @@ class SettingsPage extends StatelessWidget {
           ),
         ],
       ),
-      body: const Center(
+      body: Center(
         child: Text(
-          'Settings',
-          style: TextStyle(fontSize: 24),
+          '${appState.userSettings?.caloriesLimit}',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+          ),
         ),
       ),
     );
