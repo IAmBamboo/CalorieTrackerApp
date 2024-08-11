@@ -4,6 +4,7 @@ import 'package:calorie_tracker_app/pages/log_entry_view.dart';
 import 'package:calorie_tracker_app/widgets/calorie_header.dart';
 import 'package:calorie_tracker_app/widgets/daily_log_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 class DayLogView extends StatelessWidget {
@@ -72,6 +73,24 @@ class DayLogView extends StatelessWidget {
                 initialDate: appState.date,
                 firstDate: DateTime(2000),
                 lastDate: DateTime(2101),
+                helpText: 'Pick a date to log',
+                 builder: (BuildContext context, Widget? child) {
+                  return Theme(
+                    data: Theme.of(context).copyWith(
+                      colorScheme: const ColorScheme.dark(
+                        primary: Colors.amber, // header background color
+                        onPrimary: Colors.black, // header text color
+                        onSurface: Color.fromARGB(255, 255, 242, 199), // body text color
+                      ),
+                      textButtonTheme: TextButtonThemeData(
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.amber, // button text color
+                        ),
+                      ),
+                    ),
+                    child: child!,
+                  );
+                },
               );
               if (pickDate != null) {
                 appState.date = pickDate;
