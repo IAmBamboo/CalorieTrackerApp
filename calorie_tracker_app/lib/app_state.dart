@@ -194,7 +194,7 @@ class AppState extends ChangeNotifier {
     required String name, // The name of the food to be saved
     required int calories, // Number of calories
     required String servingUnit, // The unit of measurement for its serving size
-    required int servingMeasured, // The number of consumed of the servingUnit (e.g., 100 of grams or 358 of mL)
+    required double servingMeasured, // The number of consumed of the servingUnit (e.g., 100 of grams or 358 of mL)
     required String eatTime, // Time when the food was eaten (e.g., breakfast, lunch, dinner, snack)
     required Function(String) onSuccess, //A Callback to let us know when it finishes
   }) {

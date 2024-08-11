@@ -16,7 +16,7 @@ class Log {
   int calories;     // Number of calories
   String eatTime;   // Time when the food was eaten (e.g., breakfast, lunch, dinner, snack)
   String servingUnit; // The unit of measurement for its serving size
-  int servingMeasured; // The number of consumed of the servingUnit (e.g., 100 of grams or 358 of mL)
+  double servingMeasured; // The number of consumed of the servingUnit (e.g., 100 of grams or 358 of mL)
 
   //Note.fromFirestore: Creates a Log instance from a Firestore DocumentSnapshot.
   factory Log.fromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot) {
@@ -28,7 +28,7 @@ class Log {
       eatTime: data?['eatTime'],
       name: data?['name'],
       servingUnit: data?['servingUnit'],
-      servingMeasured: data?['servingMeasured'],
+      servingMeasured: (data?['servingMeasured'] as num).toDouble(),
     );
   }
 
