@@ -46,7 +46,7 @@ class AppState extends ChangeNotifier {
     }
 
     FirebaseFirestore.instance
-        .collection('/savedDays/${user!.uid}/userSettings')
+        .collection('/savedUsers/${user!.uid}/userSettings')
         .get()
         .then((snapshot) {
           print('Console Print: User Settings query completed with ${snapshot.docs.length} documents found');
@@ -54,7 +54,7 @@ class AppState extends ChangeNotifier {
             //No previous settings were found, create defaults
             print('Console Print: No user settings found');
             FirebaseFirestore.instance
-              .collection('/savedDays/${user!.uid}/userSettings')
+              .collection('/savedUsers/${user!.uid}/userSettings')
               .doc('caloriesLimit')
               .set({'userSet': 1800})
               .then((_) {
@@ -113,7 +113,7 @@ class AppState extends ChangeNotifier {
     }
 
     FirebaseFirestore.instance
-        .collection('/savedDays/${user!.uid}/savedDays/$dateString/foods')
+        .collection('/savedUsers/${user!.uid}/savedDays/$dateString/foods')
         .get()
         .then((snapshot) {
           print('Console Print: Query completed with ${snapshot.docs.length} documents found');
@@ -137,7 +137,7 @@ class AppState extends ChangeNotifier {
     }
 
     FirebaseFirestore.instance
-      .collection('/savedDays/${user!.uid}/savedDays/$dateString/foods')
+      .collection('/savedUsers/${user!.uid}/savedDays/$dateString/foods')
       .doc(log.id) //this needs to be changed (make sure we are setting a proper ID in logs model)
       .update(log.toMap())
       .then((_) {
@@ -158,7 +158,7 @@ class AppState extends ChangeNotifier {
     }
 
     FirebaseFirestore.instance
-      .collection('/savedDays/${user!.uid}/savedDays/$dateString/foods')
+      .collection('/savedUsers/${user!.uid}/savedDays/$dateString/foods')
       .doc(log.id)
       .delete()
       .then((_) {
@@ -194,7 +194,7 @@ class AppState extends ChangeNotifier {
     );
 
     FirebaseFirestore.instance
-      .collection('/savedDays/${user!.uid}/savedDays/$dateString/foods')
+      .collection('/savedUsers/${user!.uid}/savedDays/$dateString/foods')
       .add(log.toMap())
       .then((DocumentReference doc) {
         log.id = doc.id;
