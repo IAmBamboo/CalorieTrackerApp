@@ -32,9 +32,11 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 17, 17, 17),
       body: Center(
-        child: CircularProgressIndicator(), // Show loading indicator
+        child: CircularProgressIndicator( // Show loading indicator
+          color: Color.fromARGB(255, 255, 196, 0),
+        ), 
       ),
     );
   }
