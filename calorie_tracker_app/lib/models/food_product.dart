@@ -17,9 +17,9 @@ class FoodProduct {
     required this.foodId,
     });
 
-  final String name;
+  final String name; // Name of the food product
   final int? calories;
-  final String? servingSize;
+  final String? servingSize; // Serving size of the food product (ex. 150g, 20mL, 2kg)
   final String? quantity;
   final double? totalFat;
   final double? saturatedFat;
@@ -30,6 +30,6 @@ class FoodProduct {
   final double? dietaryFiber;
   final double? sugars;
   final double? proteins;
-  final String? imageUrl;
+  final String? imageUrl; // String URL of the image from OpenFoodFact's database
   final String? foodId; // Barcode ID for the food item used to find it in OpenFoodFact's database
 }
