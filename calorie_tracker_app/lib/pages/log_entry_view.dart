@@ -20,7 +20,7 @@ class _LogEntryViewState extends State<LogEntryView> {
   late int _foodCal; // Calories of the log entry
   bool _isNewLog = true; //Used to identify if this instance is for a new Log or an existing one
   late bool _isLoggedIn; //Used to identify if a user is signed in
-  late String? _docId; //Local DocId/Log Id
+  late String? _foodId; //Barcode ID
 
   // Search state variables
   String _searchQuery = '';
@@ -41,7 +41,9 @@ class _LogEntryViewState extends State<LogEntryView> {
       _foodName = widget.log!.name;
       _foodCal = widget.log!.calories;
       _isNewLog = false; //Update the Bool used to identify if a Log was passed
-      _docId = widget.log!.id; //Transfer the docId to the local one
+      _foodId = widget.log!.foodId; //Transfer the barcode Id
+      print('Console Print: Existing log entry');
+      _searchFood(_foodId!, true); //Search by barcode
     } else {
       //A Log was not provided so set everything to defaults
       _foodName = '';
@@ -49,20 +51,37 @@ class _LogEntryViewState extends State<LogEntryView> {
     }
   }
 
-  Future<void> _searchFood(String query) async {
-    //API documentation: https://openfoodfacts.github.io/openfoodfacts-server/api/
+  Future<void> _searchFood(String query, bool isBarCode) async {
+    // API documentation: https://openfoodfacts.github.io/openfoodfacts-server/api/
     //                   https://openfoodfacts.github.io/openfoodfacts-server/api/tutorial-off-api/
     setState(() {
       _isLoading = true;
     });
+    print('Console Print: Searching with query $query, Barcode: $isBarCode');
+    late http.Response response;
 
-    final response = await http.get(
-      Uri.parse('https://world.openfoodfacts.org/cgi/search.pl?search_terms=$query&search_simple=1&action=process&json=1&sort_by=unique_scans_n'),
-    );
+    if (isBarCode == false) {
+      response = await http.get(
+        Uri.parse('https://world.openfoodfacts.org/cgi/search.pl?search_terms=$query&search_simple=1&action=process&json=1&sort_by=unique_scans_n'),
+      );
+    } else if (isBarCode == true) {
+      response = await http.get(
+        Uri.parse('https://world.openfoodfacts.org/api/v0/product/$query.json'),
+      );
+    }
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      final products = data['products'] ?? [];
+      
+      final List<dynamic> products;
+      if (isBarCode) {
+        //Barcode search should only return a single product, use that product
+        products = [data['product']];
+      } else {
+        //Is not Barcode search, will have a list
+        products = data['products'] ?? [];
+      }
+
       final List<FoodProduct> searchResults = products.map<FoodProduct>((product) {
         final nutriments = product['nutriments'] ?? {};
         final String? originalServingSize = product['serving_size'];
@@ -76,7 +95,7 @@ class _LogEntryViewState extends State<LogEntryView> {
         if (nutriments.containsKey('energy-kcal_serving')) {
           calories = nutriments['energy-kcal_serving'].toInt();
         } else if (nutriments.containsKey('energy-kcal_100g')) {
-          //resort to 100g/100ml stats if no cal per serving is found
+          //Resort to 100g/100ml stats if no cal per serving is found
           calories = nutriments['energy-kcal_100g'].toInt();
           servingSize = '100g/100ml';
         } else {
@@ -84,27 +103,30 @@ class _LogEntryViewState extends State<LogEntryView> {
         }
 
         return FoodProduct(
-          name: productName, 
-          calories: calories, 
+          name: productName,
+          calories: calories,
           servingSize: servingSize,
           quantity: quantity,
-          foodId: barCodeId
+          foodId: barCodeId,
         );
       }).toList();
 
       setState(() {
         _searchResults = searchResults;
-        _searchMessage = 'Search found ${_searchResults.length} products';
+        _searchMessage = 'Search found ${_searchResults.length} product(s)';
         _isLoading = false;
+        print('Console Print: Product search success ${_searchResults.length} result(s) found. Barcode: $isBarCode');
       });
     } else if (response.statusCode == 500 || response.statusCode == 502 || response.statusCode == 503) {
       setState(() {
-        _searchMessage = 'Error code: ${response.statusCode}, OpenFoodFacts server is down. Please wait awhile';
+        _searchMessage = 'Error code: ${response.statusCode}, OpenFoodFacts server is down. Please wait a while';
+        print('Console Print: Product search error ${response.statusCode}, OpenFoodFacts server is down.');
         _isLoading = false;
       });
     } else {
       setState(() {
         _searchMessage = 'Error fetching search results, code: ${response.statusCode}';
+        print('Console Print: Product search error ${response.statusCode}');
         _isLoading = false;
       });
     }
@@ -182,7 +204,7 @@ class _LogEntryViewState extends State<LogEntryView> {
                     IconButton(
                       icon: const Icon(Icons.search, color: Color.fromARGB(255, 255, 228, 141)),
                       onPressed: () {
-                        _searchFood(_searchQuery);
+                        _searchFood(_searchQuery, false);
                       },
                     ),
                   ],
