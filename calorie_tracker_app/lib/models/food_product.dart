@@ -4,6 +4,15 @@ class FoodProduct {
     required this.servingSize,
     required this.name,
     required this.quantity,
+    required this.totalFat,
+    required this.saturatedFat,
+    required this.transFat,
+    required this.cholesterol,
+    required this.sodium,
+    required this.totalCarbohydrates,
+    required this.dietaryFiber,
+    required this.sugars,
+    required this.proteins,
     required this.imageUrl,
     required this.foodId,
     });
@@ -12,6 +21,15 @@ class FoodProduct {
   final int? calories;
   final String? servingSize;
   final String? quantity;
+  final double? totalFat;
+  final double? saturatedFat;
+  final double? transFat;
+  final int? cholesterol;
+  final int? sodium;
+  final double? totalCarbohydrates;
+  final double? dietaryFiber;
+  final double? sugars;
+  final double? proteins;
   final String? imageUrl;
   final String? foodId; // Barcode ID for the food item used to find it in OpenFoodFact's database
 }
