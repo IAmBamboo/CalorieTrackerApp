@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:calorie_tracker_app/app_state.dart';
 import 'package:intl/intl.dart';
 
+//This is the 'Home' of the app which has the bottom navbar which also renders the body depending
+//on the bottom navbar choice of index
 class HomePage extends StatefulWidget {
   const HomePage({required this.appState, super.key});
 
@@ -20,6 +22,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int? _expandedTile; //Used to control which ListTile is expanded
   late AnimationController _controller; //Animation Controller
   int _selectedIndex = 0; //Selected index of the bottom navbar
+  bool _isLoading = true; //Used to track loading state
 
   @override
   void initState() {
@@ -47,8 +50,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       _isLoggedIn = widget.appState.loggedIn;
       _logsList = widget.appState.logs ?? [];
       _expandedTile = null;
-      print('Console Print: User is ${widget.appState.user?.email ?? 'unknown'}');
-      print('Console Print: Login status is $_isLoggedIn');
+      print('Console Print: home.dart User is ${widget.appState.user?.email ?? 'unknown'}');
+      print('Console Print: home.dart Login status is $_isLoggedIn');
+      _isLoading = false;
+      print('Console Print: Setting isLoading on home.dart to $_isLoading');
     });
   }
 
@@ -60,12 +65,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Color.fromARGB(255, 17, 17, 17),
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Color.fromARGB(255, 255, 196, 0),
+          ),
+        ),
+      );
+    }
     if (_isLoggedIn) { //If there is a user signed in, show their Food Logs
-      print('Console Print: Login status is $_isLoggedIn');
       if (widget.appState.date != null) {
-        print('Console Print: Updated AppState Date is ${DateFormat('M-d-yyyy').format(widget.appState.date!)}');
+        print('Console Print: home.dart AppState Date is ${DateFormat('M-d-yyyy').format(widget.appState.date!)}');
       } else {
-        print('Console Print: ERROR widget.appState.date returned as NULL');
+        print('Console Print: home.dart ERROR widget.appState.date returned as NULL');
       }
 
       return Scaffold(
