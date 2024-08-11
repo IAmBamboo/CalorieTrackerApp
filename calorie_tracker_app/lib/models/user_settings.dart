@@ -5,7 +5,7 @@ class UserSettings {
     required this.caloriesLimit,
     });
 
-  int caloriesLimit;     // Number of calories
+  int caloriesLimit;     // Number of daily calorie limit
 
   //Note.fromFirestore: Creates a Log instance from a Firestore DocumentSnapshot.
   factory UserSettings.fromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot) {
