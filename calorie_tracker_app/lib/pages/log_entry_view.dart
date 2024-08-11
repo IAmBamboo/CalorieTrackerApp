@@ -16,11 +16,10 @@ class LogEntryView extends StatefulWidget {
 
 
 class _LogEntryViewState extends State<LogEntryView> {
-  late String _foodName; //Name of the log entry
-  late int _foodCal; // Calories of the log entry
   bool _isNewLog = true; //Used to identify if this instance is for a new Log or an existing one
   late bool _isLoggedIn; //Used to identify if a user is signed in
   late String? _foodId; //Barcode ID
+  late FoodProduct? singleProduct;
 
   // Search state variables
   String _searchQuery = '';
@@ -38,16 +37,13 @@ class _LogEntryViewState extends State<LogEntryView> {
     //Check to see if a Log was provided when navigating to this page
     if (widget.log != null) { 
       //A Log was provided so copy the contents of the Log to this page
-      _foodName = widget.log!.name;
-      _foodCal = widget.log!.calories;
       _isNewLog = false; //Update the Bool used to identify if a Log was passed
       _foodId = widget.log!.foodId; //Transfer the barcode Id
       print('Console Print: Existing log entry');
       _searchFood(_foodId!, true); //Search by barcode
     } else {
       //A Log was not provided so set everything to defaults
-      _foodName = '';
-      _foodCal = 0;
+      //Can add more handling in the future
     }
   }
 
@@ -88,6 +84,9 @@ class _LogEntryViewState extends State<LogEntryView> {
         final String productName = product['product_name'] ?? 'Unknown product';
         final String? quantity = product['quantity'] ?? '';
         final String? barCodeId = product['code'] ?? 'Unknown barcode';
+        final String imageUrl = product.containsKey('image_url') && product['image_url'].isNotEmpty
+          ? product['image_url']
+          : '';
 
         int? calories;
         String? servingSize = originalServingSize;
@@ -108,6 +107,7 @@ class _LogEntryViewState extends State<LogEntryView> {
           servingSize: servingSize,
           quantity: quantity,
           foodId: barCodeId,
+          imageUrl: imageUrl
         );
       }).toList();
 
@@ -115,6 +115,9 @@ class _LogEntryViewState extends State<LogEntryView> {
         _searchResults = searchResults;
         _searchMessage = 'Search found ${_searchResults.length} product(s)';
         _isLoading = false;
+        if (isBarCode == true) {
+          singleProduct = _searchResults.isNotEmpty ? _searchResults.first : null;
+        }
         print('Console Print: Product search success ${_searchResults.length} result(s) found. Barcode: $isBarCode');
       });
     } else if (response.statusCode == 500 || response.statusCode == 502 || response.statusCode == 503) {
@@ -158,8 +161,8 @@ class _LogEntryViewState extends State<LogEntryView> {
                   ]
                 ),
               )
-            : const Text('Old log',
-              style: TextStyle(
+            : Text('Viewing ${widget.log!.name}',
+              style: const TextStyle(
                 color: Color.fromARGB(255, 255, 228, 141),
                 shadows: <Shadow>[
                   Shadow(
@@ -222,13 +225,31 @@ class _LogEntryViewState extends State<LogEntryView> {
                     ),
               if (!_isNewLog) 
               // THIS IS A NOT NEW LOG, SHOW CONTENT OF THE LOG ITEM
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Food Name: $_foodName", style: const TextStyle(color: Colors.white)),
-                  Text("Food Cal: ${_foodCal.toString()}", style: const TextStyle(color: Colors.white)),
-                ],
-              ),
+                if (_isLoading)
+                  const CircularProgressIndicator()
+                else
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (singleProduct!.imageUrl!.isNotEmpty)
+                      SizedBox(
+                        width: 400, // Set the desired width
+                        height: 400, // Set the desired height
+                        child: Image.network(
+                          singleProduct?.imageUrl ?? '',
+                          fit: BoxFit.contain, // Scales the image to cover the box
+                        ),
+                      ),
+                      if (singleProduct!.imageUrl!.isNotEmpty)
+                        const SizedBox(height: 40), //Padding
+                      Text('Serving Size: ${singleProduct?.calories.toString() ?? 'Unknown'} cals per ${singleProduct?.servingSize ?? 'Unknown'}.', 
+                        style: const TextStyle(color: Colors.white)
+                      ),
+                      Text("You logged: ${widget.log!.calories.toString()} calories from ${widget.log!.servingMeasured.toString()}${widget.log!.servingUnit}", style: const TextStyle(color: Colors.white)),
+                      Text("Barcode ID: $_foodId", style: const TextStyle(color: Colors.white)),
+                      
+                    ],
+                  ),
               //CLEAN THIS UP
               if (_isNewLog) 
                 if (!_isLoading)
@@ -236,9 +257,7 @@ class _LogEntryViewState extends State<LogEntryView> {
               if (_isNewLog) 
                 if (!_isLoading)
                   Text(_searchMessage, style: const TextStyle(color: Colors.white)),
-              if (_isNewLog) 
-                if (!_isLoading)
-                const SizedBox(height: 20), //Padding
+              const SizedBox(height: 60), //Padding
               const Text('Data provided by (c) Open Food Facts contributors',
                 style: TextStyle(
                     color: Colors.white
