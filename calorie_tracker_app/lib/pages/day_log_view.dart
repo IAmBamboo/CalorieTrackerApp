@@ -256,7 +256,7 @@ class DayLogView extends StatelessWidget {
                           ),
                         ),
                         subtitle: Text(
-                          'Calories: ${log.calories.toString()}',
+                          'Calories: ${log.calories.toString()} from ${log.servingMeasured.toString()}${log.servingUnit}',
                           maxLines: isExpanded ? null : 1,
                           overflow: isExpanded
                               ? TextOverflow.visible
