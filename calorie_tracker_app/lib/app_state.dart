@@ -1,5 +1,6 @@
 import "package:calorie_tracker_app/firebase_options.dart";
 import "package:calorie_tracker_app/models/log.dart";
+import "package:calorie_tracker_app/models/user_settings.dart";
 import "package:flutter/material.dart";
 import "package:firebase_core/firebase_core.dart";
 import "package:firebase_auth/firebase_auth.dart" hide EmailAuthProvider;
@@ -29,6 +30,58 @@ class AppState extends ChangeNotifier {
   set date(DateTime? date) {
     _date = date;
     notifyListeners();
+  }
+
+  UserSettings? _userSettings;
+  UserSettings? get userSettings => _userSettings;
+  set userSettings(UserSettings? settings) {
+    _userSettings = settings;
+  }
+  void fetchUserSettings() {
+    int? caloriesLimit;
+
+    if (user == null) {
+      print('Console Print: Cannot fetch user settings when user is null');
+      return;
+    }
+
+    FirebaseFirestore.instance
+        .collection('/savedDays/${user!.uid}/userSettings')
+        .get()
+        .then((snapshot) {
+          print('Console Print: User Settings query completed with ${snapshot.docs.length} documents found');
+          if (snapshot.docs.isEmpty) {
+            //No previous settings were found, create defaults
+            print('Console Print: No user settings found');
+            FirebaseFirestore.instance
+              .collection('/savedDays/${user!.uid}/userSettings')
+              .doc('caloriesLimit')
+              .set({'userSet': 1800})
+              .then((_) {
+                print('Console Print: Created caloriesLimit document with default value 1800');
+                caloriesLimit = 1800;
+              }).catchError((error) {
+                print('Console Print: Error creating caloriesLimit document: $error');
+              });
+            return;
+          }
+
+          for (var doc in snapshot.docs) {
+            if (doc.id == 'caloriesLimit') {
+              caloriesLimit = doc.data()['userSet']?.toInt();
+            }
+          }
+
+          // Set userSettings object
+          userSettings = UserSettings(
+            caloriesLimit: caloriesLimit!,
+          );
+
+          print('Console Print: User settings fetched and updated');
+          print('Console Print: User calories limit is $caloriesLimit');
+        }).catchError((error) {
+      print('Console Print: Error fetching user settings: $error');
+    });
   }
 
   List<Log>? _logs;
@@ -121,6 +174,8 @@ class AppState extends ChangeNotifier {
     required String foodId, // The unique ID of the food item to be saved
     required String name, // The name of the food to be saved
     required int calories, // Number of calories
+    required String servingUnit, // The unit of measurement for its serving size
+    required int servingMeasured, // The number of consumed of the servingUnit (e.g., 100 of grams or 358 of mL)
     required String eatTime, // Time when the food was eaten (e.g., breakfast, lunch, dinner, snack)
     required Function(String) onSuccess, //A Callback to let us know when it finishes
   }) {
@@ -134,6 +189,8 @@ class AppState extends ChangeNotifier {
       name: name,
       calories: calories,
       eatTime: eatTime,
+      servingUnit: servingUnit,
+      servingMeasured: servingMeasured,
     );
 
     FirebaseFirestore.instance
@@ -173,6 +230,8 @@ class AppState extends ChangeNotifier {
         print('Console Print: User is not null, user is ${user.email}');
         _loggedIn = true;
         this.user = user;
+        print('Console Print: Fetching user settings');
+        fetchUserSettings();
         if (_date != null) {
           print('Console Print: Fetching logs with $_date');
           fetchLogs(_date!);
