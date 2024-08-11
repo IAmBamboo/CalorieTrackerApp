@@ -16,21 +16,20 @@ class LogEntryView extends StatefulWidget {
   State<LogEntryView> createState() => _LogEntryViewState();
 }
 
-
 class _LogEntryViewState extends State<LogEntryView> {
   bool _isNewLog = true; //Used to identify if this instance is for a new Log or an existing one
   late bool _isLoggedIn; //Used to identify if a user is signed in
-  late String? _foodId; //Barcode ID
-  late FoodProduct? singleProduct;
+  late String? _foodId; //Barcode ID of the food item
+  late FoodProduct? singleProduct; //Used for Barcode entries, transfer the search result into a single object to use
 
   // Search state variables
-  String _searchQuery = '';
-  List<FoodProduct> _searchResults = [];
-  String _searchMessage = '';
-  bool _isLoading = false;
+  String _searchQuery = ''; //Query to search
+  List<FoodProduct> _searchResults = []; //List of results as FoodProducts
+  String _searchMessage = ''; //Used as feedback for the user
+  bool _isLoading = false; //Used for feedback for the ui
   int? _expandedTile; //Used to control which ListTile is expanded
 
-  String? selectedEatTime;
+  String? selectedEatTime; //Used by the dropdown menu to store the selected value of the add popup
 
   @override
   void initState() {
@@ -41,23 +40,172 @@ class _LogEntryViewState extends State<LogEntryView> {
       //A Log was provided so copy the contents of the Log to this page
       _isNewLog = false; //Update the Bool used to identify if a Log was passed
       _foodId = widget.log!.foodId; //Transfer the barcode Id
-      print('Console Print: Existing log entry');
       _searchFood(_foodId!, true); //Search by barcode
     } else {
-      //A Log was not provided so set everything to defaults
-      //Can add more handling in the future
+      //A Log was not provided, can add more handling here in the future
     }
   }
 
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoggedIn) { //If there is a user signed in, show the log page
+      return Scaffold(
+        backgroundColor: const Color.fromARGB(255, 17, 17, 17),
+        appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 17, 17, 17),
+          leading: IconButton( //This is the back button
+            icon: const Icon(Icons.arrow_back, size: 30, color: Color.fromARGB(255, 255, 196, 0)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          //This is the Title of the page
+          title: _isNewLog //Check if a log was provided
+            ? const Text("Add new log entry", //No log
+                style: TextStyle(
+                  color: Color.fromARGB(255, 255, 228, 141),
+                  shadows: <Shadow>[
+                    Shadow(
+                      blurRadius: 2,
+                      color: Color.fromARGB(255, 255, 228, 141),
+                    ),
+                  ]
+                ),
+              )
+            : Text('Viewing ${widget.log!.name}', //A log was provided, use the log data
+              style: const TextStyle(
+                color: Color.fromARGB(255, 255, 228, 141),
+                shadows: <Shadow>[
+                  Shadow(
+                    blurRadius: 2,
+                    color: Color.fromARGB(255, 255, 228, 141),
+                  ),
+                ]
+              ),
+            )
+        ),
+        //This is the body of the page
+        body: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            children: [
+              if (_isNewLog) ...[ //Check to see if a log was provided, adjust body depending on so
+                //This is a new log, let the user search the OpenFoodFact's database for food
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: TextField( //This is the search field to search for food
+                        autofocus: false,
+                        style: const TextStyle(color: Colors.white),
+                        cursorColor: Colors.white,
+                        decoration: const InputDecoration(
+                          hintText: 'Search here',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Color.fromARGB(255, 255, 228, 141), width: 2.0),
+                          ),
+                        ),
+                        onChanged: (query) {
+                          setState(() {
+                            _searchQuery = query;
+                          });
+                        },
+                      ),
+                    ),
+                    IconButton( //Search button
+                      icon: const Icon(Icons.search, color: Color.fromARGB(255, 255, 228, 141)),
+                      onPressed: () {
+                        _searchFood(_searchQuery, false);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 40), //Padding
+                if (_isLoading) 
+                  const CircularProgressIndicator(
+                    color: Color.fromARGB(255, 255, 196, 0),
+                  ) 
+                else 
+                  Expanded(
+                    child: _searchResults.isEmpty
+                      ? const Center(child: Text('No results found', style: TextStyle(color: Colors.white)))
+                      : _buildList(_searchResults),
+                  ),
+              ] else ...[
+              //This is an existing log, show the product data and log data
+                if (_isLoading)
+                  const CircularProgressIndicator(
+                    color: Color.fromARGB(255, 255, 196, 0),
+                  )
+                else
+                  Expanded(
+                    child: ProductLogView(
+                      singleProduct: singleProduct,
+                      log: widget.log,
+                    ),
+                  ),
+                  const SizedBox(height: 10), //Padding
+              ],
+              if (_isNewLog) // Search Message Handling
+                if (!_isLoading) ... [
+                  const SizedBox(height: 10), //Padding
+                  Text(_searchMessage, style: const TextStyle(color: Colors.white)),
+                ],
+              //Bottom disclaimer text
+              const SizedBox(height: 10), //Padding
+              const Text('Data provided by (c) Open Food Facts contributors',
+                style: TextStyle(
+                    color: Colors.white
+                  ),
+                ),
+              const Text('https://world.openfoodfacts.org/',
+                style: TextStyle(
+                    color: Colors.white
+                  ),
+                ),
+            ]
+          ),
+        ),
+      );
+    } else { //If there is no user signed in, show a Page asking the user to Sign in
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Calorie Tracker App'),
+        ),
+        body: ListView(
+          children: [
+            const SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed('/sign-in');
+              },
+              child: const Text('Sign In'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  /// Searches using the query and provided info to find product(s) matching the given information
+  /// from the OpenFoodFact's database. Updates the local list of searchResults with FoodProducts 
+  /// that match the given query. If a Barcode was provided, it will return a singular FoodProduct in the list
+  /// Arguments:
+  /// - query: A string to search through the OpenFoodFact;s database with
+  /// - isBarCode: A boolean about whether or not the search is using a Barcode (Used for existing logs)
   Future<void> _searchFood(String query, bool isBarCode) async {
     // API documentation: https://openfoodfacts.github.io/openfoodfacts-server/api/
-    //                   https://openfoodfacts.github.io/openfoodfacts-server/api/tutorial-off-api/
+    //                    https://openfoodfacts.github.io/openfoodfacts-server/api/tutorial-off-api/
     setState(() {
       _isLoading = true;
     });
-    print('Console Print: Searching with query $query, Barcode: $isBarCode');
     late http.Response response;
 
+    //Check for barcode as the search link differs
     if (isBarCode == false) {
       response = await http.get(
         Uri.parse('https://world.openfoodfacts.org/cgi/search.pl?search_terms=$query&search_simple=1&action=process&json=1&sort_by=unique_scans_n'),
@@ -103,7 +251,9 @@ class _LogEntryViewState extends State<LogEntryView> {
         int? calories;
         String? servingSize = originalServingSize;
 
+        //Adjusting calories and serving size info based off available information
         if (nutriments.containsKey('energy-kcal_serving')) {
+          //A specific serving size was found, use it
           calories = nutriments['energy-kcal_serving'].toInt();
         } else if (nutriments.containsKey('energy-kcal_100g')) {
           //Resort to 100g/100ml stats if no cal per serving is found
@@ -139,7 +289,6 @@ class _LogEntryViewState extends State<LogEntryView> {
         if (isBarCode == true) {
           singleProduct = _searchResults.isNotEmpty ? _searchResults.first : null;
         }
-        print('Console Print: Product search success ${_searchResults.length} result(s) found. Barcode: $isBarCode');
       });
     } else if (response.statusCode == 500 || response.statusCode == 502 || response.statusCode == 503) {
       setState(() {
@@ -153,148 +302,6 @@ class _LogEntryViewState extends State<LogEntryView> {
         print('Console Print: Product search error ${response.statusCode}');
         _isLoading = false;
       });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoggedIn) { //If there is a user signed in, show the log page
-      return Scaffold(
-        backgroundColor: const Color.fromARGB(255, 17, 17, 17),
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, size: 30, color: Color.fromARGB(255, 255, 196, 0)),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          backgroundColor: const Color.fromARGB(255, 17, 17, 17),
-          //This is the Title of the page
-          title: _isNewLog
-            ? const Text("Add new log entry", 
-                style: TextStyle(
-                  color: Color.fromARGB(255, 255, 228, 141),
-                  shadows: <Shadow>[
-                    Shadow(
-                      blurRadius: 2,
-                      color: Color.fromARGB(255, 255, 228, 141),
-                    ),
-                  ]
-                ),
-              )
-            : Text('Viewing ${widget.log!.name}',
-              style: const TextStyle(
-                color: Color.fromARGB(255, 255, 228, 141),
-                shadows: <Shadow>[
-                  Shadow(
-                    blurRadius: 2,
-                    color: Color.fromARGB(255, 255, 228, 141),
-                  ),
-                ]
-              ),
-            )
-        ),
-
-        body: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            children: [
-              if (_isNewLog) 
-                // THIS IS A NEW LOG, SHOW A SEARCH TO THE OPENFOODFACT'S DATABASE
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        autofocus: false,
-                        style: const TextStyle(color: Colors.white),
-                        cursorColor: Colors.white,
-                        decoration: const InputDecoration(
-                          hintText: 'Search here',
-                          hintStyle: TextStyle(color: Colors.grey),
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey),
-                          ),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color.fromARGB(255, 255, 228, 141), width: 2.0),
-                          ),
-                        ),
-                        onChanged: (query) {
-                          setState(() {
-                            _searchQuery = query;
-                          });
-                        },
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.search, color: Color.fromARGB(255, 255, 228, 141)),
-                      onPressed: () {
-                        _searchFood(_searchQuery, false);
-                      },
-                    ),
-                  ],
-                ),
-              const SizedBox(height: 40), //Padding
-              if (_isNewLog) 
-                if (_isLoading)
-                  const CircularProgressIndicator()
-                else
-                  Expanded(
-                    child: _searchResults.isEmpty 
-                      ? const Center(child: Text('No results found', style: TextStyle(color: Colors.white))) 
-                      // BUILDING A LIST TO DISPLAY SEARCH RESULTS
-                      : _buildList(_searchResults)
-                    ),
-              if (!_isNewLog) 
-              // THIS IS A NOT NEW LOG, SHOW CONTENT OF THE LOG ITEM
-                if (_isLoading)
-                  const CircularProgressIndicator()
-                else
-                  Expanded(
-                    child: ProductLogView(
-                      singleProduct: singleProduct,
-                      log: widget.log,
-                    ),
-                  ),
-              //CLEAN THIS UP
-              if (_isNewLog) 
-                if (!_isLoading)
-                const SizedBox(height: 20), //Padding
-              if (_isNewLog) 
-                if (!_isLoading)
-                  Text(_searchMessage, style: const TextStyle(color: Colors.white)),
-              const SizedBox(height: 60), //Padding
-              const Text('Data provided by (c) Open Food Facts contributors',
-                style: TextStyle(
-                    color: Colors.white
-                  ),
-                ),
-              const Text('https://world.openfoodfacts.org/',
-                style: TextStyle(
-                    color: Colors.white
-                  ),
-                ),
-            ]
-          ),
-        ),
-      );
-    } else { //If there is no user signed in, show a Page asking the user to Sign in
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Calorie Tracker App'),
-        ),
-        body: ListView(
-          children: [
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed('/sign-in');
-              },
-              child: const Text('Sign In'),
-            ),
-          ],
-        ),
-      );
     }
   }
 
@@ -381,11 +388,9 @@ class _LogEntryViewState extends State<LogEntryView> {
                         onSelected: (value) {
                           switch (value) {
                             case 'add':
-                              print('Console Print: Add to log');
                               _showAddPopup(context, product); // Show dialog to get additional input
                               break;
                               case 'open':
-                              print('Console Print: Open search result');
                               searchResultPopup(context, product); // Show product info
                               break;
                           }
@@ -415,20 +420,25 @@ class _LogEntryViewState extends State<LogEntryView> {
   }
 
 
-
+  /// Builds a pop up window that allows the user to add a FoodProduct to their Log list
+  /// It will calculate the calories by using the given FoodProduct's information and extract
+  /// other necessary information to transfer everything required into a Log object to save
+  /// Arguments:
+  /// - context: The BuildContext to be passed
+  /// - product: The FoodProduct to be used and converted into a Log object to save
   Future<void> _showAddPopup(BuildContext context, FoodProduct product) async {
     final List<String> eatTimeOptions = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
     final TextEditingController servingController = TextEditingController();
-    String? errorMessage;
-    String? servingSizeText;
-    double? servingSize;
+    String? errorMessage; //Error message for user feedback
+    String? servingSizeText; //The unit of measurement from the serving size
+    double? servingSize; //The measurement of the serving size
 
-    if (product.servingSize == '100g/100ml') {
+    if (product.servingSize == '100g/100ml') { //This is a default measurement commonly found
       servingSizeText = 'g/ml';
       servingSize = 100;
-    } else {
-      servingSizeText = product.servingSize?.replaceAll(RegExp(r'[0-9]'), '') ?? '';
-      servingSize = _parseServingSize(product.servingSize);
+    } else { //Good chance we are not using the default measurement, if so then we need to extract the info
+      servingSizeText = product.servingSize?.replaceAll(RegExp(r'[0-9]'), '') ?? ''; //Remove numbers from the serving size text
+      servingSize = _parseServingSize(product.servingSize); //Parse the string and use the first whole number found
     }
 
     return showDialog<void>(
@@ -457,7 +467,7 @@ class _LogEntryViewState extends State<LogEntryView> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Row(
+                  Row( //Dropdown menu row
                     children: [
                       const Text('I ate this at ',
                         style: TextStyle(
@@ -495,7 +505,7 @@ class _LogEntryViewState extends State<LogEntryView> {
                       ),
                     ],
                   ),
-                  Row(
+                  Row( //Calorie textfield row
                     children: [
                       Expanded(
                         child: Column(
@@ -541,37 +551,34 @@ class _LogEntryViewState extends State<LogEntryView> {
                   ),
                 ],
               ),
-              actions: <Widget>[
+              actions: <Widget>[ //Buttons at bottom
                 TextButton(
-                  child: const Text('Cancel'),
+                  child: const Text('Cancel', style: TextStyle(color: Color.fromARGB(255, 255, 196, 0),),),
                   onPressed: () {
-                    selectedEatTime = null;
-                    Navigator.of(context).pop();
+                    selectedEatTime = null; //reset this
+                    Navigator.of(context).pop(); //Pop the popup window
                   },
                 ),
                 TextButton(
-                  child: const Text('Add'),
+                  child: const Text('Add', style: TextStyle(color: Color.fromARGB(255, 255, 196, 0),),),
                   onPressed: () {
-                    if (selectedEatTime != null) {
-                      double? userEnteredAmount = double.tryParse(servingController.text);
+                    if (selectedEatTime != null) { //make sure they selected an eatTime
+                      double? userEnteredAmount = double.tryParse(servingController.text); //get user input
+
                       if (userEnteredAmount != null && servingSize != null) {
-                        double calcCalories = (userEnteredAmount / servingSize) * (product.calories ?? 0);
-                        int totalCalories = calcCalories.toInt();
-                        print('Console Print: $userEnteredAmount / $servingSize * ${product.calories}');
-                        print('Console Print: Calculated calories to $totalCalories');
-                        print('Console Print: set servingUnit to $servingSizeText');
-                        widget.appState.addLog(
-                          foodId: product.foodId ?? 'default_food_id',
+                        double calcCalories = (userEnteredAmount / servingSize) * (product.calories ?? 0); //Calc new calories from input and servingsize
+                        int totalCalories = calcCalories.toInt(); //Convert to int
+                        widget.appState.addLog( //Add log
+                          foodId: product.foodId ?? 'no_bar_code',
                           name: product.name,
                           calories: totalCalories,
                           eatTime: selectedEatTime!,
                           servingUnit: servingSizeText!,
                           servingMeasured: userEnteredAmount,
                           onSuccess: (logId) {
-                            print('Console Print: Log added successfully with ID: $logId');
+                            Navigator.of(context).pop(); //Close window after add
                           },
                         );
-                        Navigator.of(context).pop();
                       } else {
                         setState(() {
                           errorMessage = 'Please enter a valid amount!';
@@ -592,9 +599,12 @@ class _LogEntryViewState extends State<LogEntryView> {
     );
   }
 
+  /// Parses a string to find the first whole number. Returns that number
+  /// Arguments:
+  /// - servingSizeText: The string to be parsed
   double? _parseServingSize(String? servingSizeText) {
     if (servingSizeText == null || servingSizeText.isEmpty) {
-      return 0;
+      return 0; //Return 0 incase we can't find anything
     }
     final match = RegExp(r'\b(\d+(\.\d+)?)\b').allMatches(servingSizeText);
     if (match.isNotEmpty) {
@@ -603,7 +613,6 @@ class _LogEntryViewState extends State<LogEntryView> {
         return double.tryParse(numbers.first!);
       }
     }
-
-    return 0;
+    return 0; //Return 0 incase we can't find anything
   }
 }
