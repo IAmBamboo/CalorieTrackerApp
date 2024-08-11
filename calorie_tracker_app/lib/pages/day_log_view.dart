@@ -23,7 +23,6 @@ class DayLogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     int totalCalories = logsList.fold(0, (sum, log) => sum + log.calories);
-    int caloriesLimit = 1800;
     
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
@@ -42,7 +41,7 @@ class DayLogView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 39, 39, 39),
         title: Text(
-          "${appState.user?.email?.split('@').first ?? 'User'}'s Calorie Log - ${DateFormat('M-d-yyyy').format(appState.date!)}",
+          "Daily Log - ${DateFormat('MMMM d, y').format(appState.date!)}",
           style: const TextStyle(
             color: Color.fromARGB(255, 255, 228, 141),
             shadows: <Shadow>[
@@ -108,7 +107,7 @@ class DayLogView extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "${caloriesLimit-totalCalories}",
+                      "${appState.userSettings!.caloriesLimit-totalCalories}",
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -152,7 +151,7 @@ class DayLogView extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "$caloriesLimit",
+                      "${appState.userSettings!.caloriesLimit}",
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
