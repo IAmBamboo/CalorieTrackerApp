@@ -2,6 +2,7 @@ import "package:calorie_tracker_app/app_state.dart";
 import "package:calorie_tracker_app/models/food_product.dart";
 import "package:calorie_tracker_app/models/log.dart";
 import "package:calorie_tracker_app/widgets/product_log_view.dart";
+import "package:calorie_tracker_app/widgets/search_result_popup.dart";
 import "package:flutter/material.dart";
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -205,6 +206,7 @@ class _LogEntryViewState extends State<LogEntryView> {
                   children: [
                     Expanded(
                       child: TextField(
+                        autofocus: false,
                         style: const TextStyle(color: Colors.white),
                         cursorColor: Colors.white,
                         decoration: const InputDecoration(
@@ -384,7 +386,7 @@ class _LogEntryViewState extends State<LogEntryView> {
                               break;
                               case 'open':
                               print('Console Print: Open search result');
-                              
+                              searchResultPopup(context, product); // Show product info
                               break;
                           }
                         },
@@ -426,11 +428,7 @@ class _LogEntryViewState extends State<LogEntryView> {
       servingSize = 100;
     } else {
       servingSizeText = product.servingSize?.replaceAll(RegExp(r'[0-9]'), '') ?? '';
-      servingSize = double.tryParse(
-      product.servingSize!
-        .replaceAll(RegExp(r'[^\d.]'), '')
-        .replaceAll(RegExp(r'\.(?=.*\.)'), '')
-      );
+      servingSize = _parseServingSize(product.servingSize);
     }
 
     return showDialog<void>(
@@ -504,6 +502,7 @@ class _LogEntryViewState extends State<LogEntryView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             TextField(
+                              autofocus: false,
                               controller: servingController,
                               keyboardType: TextInputType.number,
                               style: const TextStyle(
@@ -554,7 +553,7 @@ class _LogEntryViewState extends State<LogEntryView> {
                   child: const Text('Add'),
                   onPressed: () {
                     if (selectedEatTime != null) {
-                      int? userEnteredAmount = int.tryParse(servingController.text);
+                      double? userEnteredAmount = double.tryParse(servingController.text);
                       if (userEnteredAmount != null && servingSize != null) {
                         double calcCalories = (userEnteredAmount / servingSize) * (product.calories ?? 0);
                         int totalCalories = calcCalories.toInt();
@@ -591,5 +590,20 @@ class _LogEntryViewState extends State<LogEntryView> {
         );
       },
     );
+  }
+
+  double? _parseServingSize(String? servingSizeText) {
+    if (servingSizeText == null || servingSizeText.isEmpty) {
+      return 0;
+    }
+    final match = RegExp(r'\b(\d+(\.\d+)?)\b').allMatches(servingSizeText);
+    if (match.isNotEmpty) {
+      final numbers = match.map((m) => m.group(0)).toList();
+      if (numbers.isNotEmpty) {
+        return double.tryParse(numbers.first!);
+      }
+    }
+
+    return 0;
   }
 }
