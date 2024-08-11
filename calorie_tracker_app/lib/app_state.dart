@@ -37,6 +37,7 @@ class AppState extends ChangeNotifier {
   set userSettings(UserSettings? settings) {
     _userSettings = settings;
   }
+
   void fetchUserSettings() {
     int? caloriesLimit;
 
@@ -49,17 +50,16 @@ class AppState extends ChangeNotifier {
       .collection('/savedUsers/${user!.uid}/userSettings')
       .get()
       .then((snapshot) {
-        print('Console Print: User Settings query completed with ${snapshot.docs.length} documents found');
         if (snapshot.docs.isEmpty) {
           //No previous settings were found, create defaults
           print('Console Print: No user settings found');
           FirebaseFirestore.instance
             .collection('/savedUsers/${user!.uid}/userSettings')
             .doc('caloriesLimit')
-            .set({'userSet': 1800})
+            .set({'userSet': 1800}) //By default, set daily limit to 1800
             .then((_) {
               print('Console Print: Created caloriesLimit document with default value 1800');
-              caloriesLimit = 1800;
+              caloriesLimit = 1800; //Update locally
             }).catchError((error) {
               print('Console Print: Error creating caloriesLimit document: $error');
             });
@@ -76,9 +76,6 @@ class AppState extends ChangeNotifier {
         userSettings = UserSettings(
           caloriesLimit: caloriesLimit!,
         );
-
-        print('Console Print: User settings fetched and updated');
-        print('Console Print: User calories limit is $caloriesLimit');
       }).catchError((error) {
         print('Console Print: Error fetching user settings: $error');
     });
@@ -86,18 +83,16 @@ class AppState extends ChangeNotifier {
 
   void updateUserSettings({required UserSettings userSettings}) {
     if (user == null) {
-      throw StateError('Cannot update user settings when user is null');
+      print('Console Print: Cannot update user settings when user is null');
+      return;
     }
 
-    // Get a reference to the user's settings document
     final userSettingsCollection = FirebaseFirestore.instance
-        .collection('savedUsers/${user!.uid}/userSettings');
+        .collection('savedUsers/${user!.uid}/userSettings'); // Get a reference to the user's settings document
 
-    // Update the caloriesLimit document
     userSettingsCollection
         .doc('caloriesLimit')
-        .update({'userSet': userSettings.caloriesLimit}).then((_) {
-      print('Console Print: User settings updated successfully');
+        .update({'userSet': userSettings.caloriesLimit}).then((_) { // Update the caloriesLimit document
     }).catchError((error) {
       print('Console Print: Failed to update user settings: $error');
     });
@@ -126,7 +121,6 @@ class AppState extends ChangeNotifier {
   void fetchLogs(DateTime date) {
     String dateString = DateFormat('M-d-yyyy').format(date);
     if (user == null) {
-      //throw StateError('Cannot fetch logs when user or date is null');
       print('Console Print: Cannot fetch logs when user is null');
       return;
     }
@@ -135,12 +129,10 @@ class AppState extends ChangeNotifier {
         .collection('/savedUsers/${user!.uid}/savedDays/$dateString/foods')
         .get()
         .then((snapshot) {
-          print('Console Print: Query completed with ${snapshot.docs.length} documents found');
           if (snapshot.docs.isEmpty) {
             print('Console Print: No logs found for date $dateString');
           }
           logs = snapshot.docs.map((doc) => Log.fromFirestore(doc)).toList();
-          print('Console Print: Logs fetched and updated');
         }).catchError((error) {
       print('Console Print: Error fetching logs: $error');
     });
@@ -157,7 +149,7 @@ class AppState extends ChangeNotifier {
 
     FirebaseFirestore.instance
       .collection('/savedUsers/${user!.uid}/savedDays/$dateString/foods')
-      .doc(log.id) //this needs to be changed (make sure we are setting a proper ID in logs model)
+      .doc(log.id)
       .update(log.toMap())
       .then((_) {
         notifyListeners();
@@ -238,23 +230,18 @@ class AppState extends ChangeNotifier {
       EmailAuthProvider(),
     ]);
 
-    // Set date to show today
+    //Set date to today
     _date = DateTime.now();
     print('Console Print: Date set to $_date');
     notifyListeners();
 
     FirebaseAuth.instance.userChanges().listen((user) {
-      print('Console Print: User change detected');
       if (user != null) {
-        print('Console Print: User is not null, user is ${user.email}');
         _loggedIn = true;
         this.user = user;
-        print('Console Print: Fetching user settings');
         fetchUserSettings();
         if (_date != null) {
-          print('Console Print: Fetching logs with $_date');
           fetchLogs(_date!);
-          print('Console Print: Fetched logs');
         } else {
           print('Console Print: Date is null at login');
         }
@@ -264,7 +251,6 @@ class AppState extends ChangeNotifier {
         print('Console Print: No user is signed in!');
       }
       notifyListeners();
-      print('Console Print: notifyListeners() called');
     });
   } catch (e) {
     print('Console Print: Error initializing Firebase: $e');
