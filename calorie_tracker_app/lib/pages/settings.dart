@@ -171,13 +171,21 @@ class SettingsPage extends StatelessWidget {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel'),
+              child: const Text('Cancel',
+                style: TextStyle(
+                  color: Colors.amber
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Add'),
+              child: const Text('Add',
+                style: TextStyle(
+                  color: Colors.amber
+                ),
+              ),
               onPressed: () {
                 int? userEnteredAmount = int.tryParse(calorieLimitController.text);
                 if (userEnteredAmount != null) {
