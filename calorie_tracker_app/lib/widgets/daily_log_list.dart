@@ -3,13 +3,13 @@ import 'package:calorie_tracker_app/pages/log_entry_view.dart';
 import 'package:flutter/material.dart';
 import 'package:calorie_tracker_app/models/log.dart';
 
-class LogListView extends StatelessWidget {
+class DailyLogList extends StatelessWidget {
   final List<Log> logsList;
   final ValueChanged<int> onTileTap;
   final int? expandedTile;
   final AppState appState;
 
-  const LogListView({
+  const DailyLogList({
     super.key,
     required this.logsList,
     required this.onTileTap,

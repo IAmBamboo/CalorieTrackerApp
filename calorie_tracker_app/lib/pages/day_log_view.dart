@@ -2,7 +2,7 @@ import 'package:calorie_tracker_app/app_state.dart';
 import 'package:calorie_tracker_app/models/log.dart';
 import 'package:calorie_tracker_app/pages/log_entry_view.dart';
 import 'package:calorie_tracker_app/widgets/calorie_header.dart';
-import 'package:calorie_tracker_app/widgets/log_list_view.dart';
+import 'package:calorie_tracker_app/widgets/daily_log_list.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -100,7 +100,7 @@ class DayLogView extends StatelessWidget {
                 ),
               ),
             )
-          : LogListView( //Build a list from the list of Logs
+          : DailyLogList( //Build a list from the list of Logs
             logsList: logsList, 
             onTileTap: onTileTap, 
             expandedTile: expandedTile, 
