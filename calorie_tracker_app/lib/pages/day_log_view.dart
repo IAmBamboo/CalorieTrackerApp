@@ -24,7 +24,7 @@ class DayLogView extends StatelessWidget {
   Widget build(BuildContext context) {
     int totalCalories = logsList.fold(0, (sum, log) => sum + log.calories);
     int caloriesLimit = 1800;
-
+    
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
         floatingActionButton: FloatingActionButton(
@@ -211,16 +211,17 @@ class DayLogView extends StatelessWidget {
 
         return [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            padding: const EdgeInsets.only(left: 16.0, top: 16.0, bottom: 8.0),
             child: Text(
               eatTime,
               style: const TextStyle(
                 fontSize: 18.0,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Color.fromARGB(255, 255, 228, 141),
               ),
             ),
           ),
+          const Divider(),
           ...logs.map<Widget>((log) {
             final bool isExpanded = expandedTile == logsList.indexOf(log);
             return GestureDetector(
@@ -256,7 +257,7 @@ class DayLogView extends StatelessWidget {
                           ),
                         ),
                         subtitle: Text(
-                          'Calories: ${log.calories.toString()} from ${log.servingMeasured.toString()}${log.servingUnit}',
+                          'Calories: ${log.calories.toString()} from ${log.servingMeasured.toString()}${log.servingUnit}\nOpenFoodFacts BarCode ID:${log.foodId}',
                           maxLines: isExpanded ? null : 1,
                           overflow: isExpanded
                               ? TextOverflow.visible
