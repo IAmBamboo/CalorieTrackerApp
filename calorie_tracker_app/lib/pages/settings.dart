@@ -13,7 +13,7 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 17, 17, 17),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 17, 17, 17),
+        backgroundColor: const Color.fromARGB(255, 39, 39, 39),
         title: const Text("Settings",
           style: TextStyle(
             color: Color.fromARGB(255, 255, 228, 141),
@@ -42,13 +42,44 @@ class SettingsPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
-        child: Text(
-          '${appState.userSettings?.caloriesLimit}',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-          ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            //Calorie Limit Section
+            ListTile(
+              title: const Text(
+                'Calorie Limit',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Color.fromARGB(255, 255, 242, 199),
+                  shadows: <Shadow>[
+                    Shadow(
+                      blurRadius: 2,
+                      color: Color.fromARGB(255, 255, 228, 141),
+                    ),
+                  ],
+                ),
+              ),
+              subtitle: const Text('Set your daily calorie limit',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 190, 190, 190),
+                ),
+              ),
+              trailing: const Icon(Icons.restaurant,
+                color: Color.fromARGB(255, 255, 228, 141),
+                shadows: <Shadow>[
+                  Shadow(
+                    blurRadius: 5,
+                    color: Color.fromARGB(255, 255, 228, 141),
+                  ),
+                ],
+              ),
+              onTap: () {
+                // Navigate to User settings
+              },
+            ),
+            const Divider(),
+          ],
         ),
       ),
     );
