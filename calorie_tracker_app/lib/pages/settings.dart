@@ -75,13 +75,116 @@ class SettingsPage extends StatelessWidget {
                 ],
               ),
               onTap: () {
-                // Navigate to User settings
+                _showCalorieLimitPopup(context);
               },
             ),
             const Divider(),
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _showCalorieLimitPopup(BuildContext context) async {
+    final TextEditingController calorieLimitController = TextEditingController();
+    int? newCalorieLimit;
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color.fromARGB(255, 31, 31, 31),
+          title: const Text(
+            'Update Calorie Limit',
+            maxLines: 3,
+            overflow: TextOverflow.visible,
+            style: TextStyle(
+              color: Color.fromARGB(255, 255, 242, 199),
+              fontSize: 20,
+              shadows: <Shadow>[
+                Shadow(
+                  blurRadius: 2,
+                  color: Color.fromARGB(255, 255, 228, 141),
+                ),
+              ],
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Your current daily calorie limit is: ${appState.userSettings!.caloriesLimit.toString()}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  TextField(
+                                    controller: calorieLimitController,
+                                    keyboardType: TextInputType.number,
+                                    style: const TextStyle(
+                                      color: Color.fromARGB(255, 190, 190, 190),
+                                    ),
+                                    decoration: const InputDecoration(
+                                      hintText: 'Enter new limit',
+                                      hintStyle: TextStyle(
+                                        color: Color.fromARGB(255, 190, 190, 190),
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ),
+                            const SizedBox(width: 8),
+                            const Text('cal/day',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    )
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Add'),
+              onPressed: () {
+                print('Console Print: User clicked with input of ${calorieLimitController.text}');
+                int? userEnteredAmount = int.tryParse(calorieLimitController.text);
+                if (userEnteredAmount != null) {
+                  //update settings
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
