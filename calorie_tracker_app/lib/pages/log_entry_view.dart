@@ -229,7 +229,7 @@ class _LogEntryViewState extends State<LogEntryView> {
                   const CircularProgressIndicator()
                 else
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       if (singleProduct!.imageUrl!.isNotEmpty)
                       SizedBox(
@@ -240,14 +240,18 @@ class _LogEntryViewState extends State<LogEntryView> {
                           fit: BoxFit.contain, // Scales the image to cover the box
                         ),
                       ),
-                      if (singleProduct!.imageUrl!.isNotEmpty)
-                        const SizedBox(height: 40), //Padding
-                      Text('Serving Size: ${singleProduct?.calories.toString() ?? 'Unknown'} cals per ${singleProduct?.servingSize ?? 'Unknown'}.', 
-                        style: const TextStyle(color: Colors.white)
-                      ),
-                      Text("You logged: ${widget.log!.calories.toString()} calories from ${widget.log!.servingMeasured.toString()}${widget.log!.servingUnit}", style: const TextStyle(color: Colors.white)),
                       Text("Barcode ID: $_foodId", style: const TextStyle(color: Colors.white)),
-                      
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (singleProduct!.imageUrl!.isNotEmpty)
+                            const SizedBox(height: 40), //Padding
+                          Text('Serving Size: ${singleProduct?.calories.toString() ?? 'Unknown'} cals per ${singleProduct?.servingSize ?? 'Unknown'}.', 
+                            style: const TextStyle(color: Colors.white)
+                          ),
+                          Text("You logged: ${widget.log!.calories.toString()} calories from ${widget.log!.servingMeasured.toString()}${widget.log!.servingUnit}", style: const TextStyle(color: Colors.white)),
+                        ],
+                      ),
                     ],
                   ),
               //CLEAN THIS UP
